@@ -21,6 +21,7 @@ typedef struct _building {
 
 void buildings_init();
 void building_add(int model, int x, int y);
+building* building_create(int model, int x, int y);
 void building_draw(building *b);
 void buildings_draw();
 
