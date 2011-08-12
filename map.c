@@ -43,8 +43,9 @@ int map_create_item(int x, int y, int item)
 }
 
 // returns whether an item was picked up
-int map_pickup_item(point *p, int item)
+int map_pickup_item(point *p)
 {
+	int item = map[point_mapindex(p)];
 	map[point_mapindex(p)] = ITEM_NONE;
 
 	// remove from the item list
@@ -64,7 +65,7 @@ int map_pickup_item(point *p, int item)
 		items[item] = items[item]->next;
 	free(picked_up);
 
-	return 1;
+	return item;
 }
 
 // returns whether an item was dropped

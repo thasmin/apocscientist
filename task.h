@@ -13,12 +13,13 @@ typedef struct _taskstep {
 
 typedef struct _task {
 	const char *desc;
-	struct _task* (*create)(dwarf*);
+	int (*recreate)(dwarf*);
 	int (*destroy)(struct _task*);
 	taskstep *steps;
 	int repeat;
 } task;
 
+int task_destroy_steps(task *t);
 int task_destroy(task *t);
 
 taskstep* taskstep_create(const char *desc, point *dest, int (*act)(dwarf*));

@@ -20,7 +20,8 @@ point_node *map_item_list(int item);
 
 point* map_find_closest(point *p, int item);
 int map_create_item(int x, int y, int item);
-int map_pickup_item(point *p, int item);
+// returns what item was picked up
+int map_pickup_item(point *p);
 int map_drop_item(point *p, int item);
 
 #endif

@@ -63,19 +63,9 @@ void destroy_map()
 	}
 }
 
-int get_bucket(dwarf *d)
+int pour_bucket_well_recreate(dwarf *d)
 {
-	return dwarf_pickup(d, ITEM_BUCKET);
-}
-int pour_bucket(dwarf *d)
-{
-	d->carrying = ITEM_NONE;
-	return 1;
-}
-task* task_pour_bucket_well_create(dwarf *d);
-task pour_bucket_task = { "Pour bucket into well", task_pour_bucket_well_create, task_destroy };
-task* task_pour_bucket_well_create(dwarf *d)
-{
+	// set up guy to pour buckets on repeat
 	point* bucket = map_find_closest(&d->p, ITEM_BUCKET);
 	if (bucket == NULL)
 		return 0;
@@ -83,19 +73,30 @@ task* task_pour_bucket_well_create(dwarf *d)
 	if (well == NULL)
 		return 0;
 
-	task *t = malloc(sizeof(task));
-	memcpy(t, &pour_bucket_task, sizeof(task));
-	t->steps = taskstep_create("Getting a bucket", bucket, get_bucket);
-	t->steps->next = taskstep_create("Going to the well", well, pour_bucket);
-	return t;
+	task_destroy_steps(d->curr_task);
+	d->curr_task->steps = taskstep_create("Getting a bucket", bucket, dwarf_pickup);
+	d->curr_task->steps->next = taskstep_create("Going to the well", well, dwarf_consume);
+	return 1;
 }
 
 void setup_tasks()
 {
 	// set up guy to pour buckets on repeat
-	guy.curr_task = pour_bucket_task.create(&guy);
-	if (guy.curr_task != NULL)
-		guy.curr_task->repeat = true;
+	point* bucket = map_find_closest(&guy.p, ITEM_BUCKET);
+	if (bucket == NULL)
+		return;
+	point* well = map_find_closest(&guy.p, ITEM_WELL);
+	if (well == NULL)
+		return;
+
+	task *t = malloc(sizeof(task));
+	t->desc = "Pour bucket into well";
+	t->recreate = pour_bucket_well_recreate;
+	t->destroy = task_destroy;
+	t->steps = taskstep_create("Getting a bucket", bucket, dwarf_pickup);
+	t->steps->next = taskstep_create("Going to the well", well, dwarf_consume);
+	guy.curr_task = t;
+	guy.curr_task->repeat = true;
 }
 
 int main(int argc, char* argv[])
@@ -168,7 +169,8 @@ int main(int argc, char* argv[])
 					temp_building = NULL;
 					menu_set_state(MENU_NONE);
 				} else if (key.vk == TCODK_ENTER) {
-					building_add(temp_building->model->model,
+					dwarf_build(&guy,
+						temp_building->model->model,
 						temp_building->x,
 						temp_building->y);
 					free(temp_building);

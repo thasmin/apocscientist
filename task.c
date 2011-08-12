@@ -2,8 +2,10 @@
 
 #include <string.h>
 
-int task_destroy(task *t)
+int task_destroy_steps(task *t)
 {
+	if (t == NULL)
+		return 1;
 	if (t->steps != NULL) {
 		taskstep *step = t->steps;
 		while (step) {
@@ -12,8 +14,16 @@ int task_destroy(task *t)
 			step = next;
 		}
 	}
-	free(t);
+	return 1;
+}
 
+int task_destroy(task *t)
+{
+	if (t == NULL)
+		return 1;
+	if (task_destroy_steps(t) == 0)
+		return 0;
+	free(t);
 	return 1;
 }
 
