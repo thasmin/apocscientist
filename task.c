@@ -2,6 +2,21 @@
 
 #include <string.h>
 
+void task_init(task *t, const char *desc)
+{
+	t->desc = desc;
+	t->recreate = NULL;
+	t->destroy = task_destroy;
+	t->repeat = 0;
+	t->steps = NULL;
+}
+
+void task_reset(task *t)
+{
+	task_destroy_steps(t);
+	t->steps = NULL;
+}
+
 int task_destroy_steps(task *t)
 {
 	if (t == NULL)
@@ -27,12 +42,63 @@ int task_destroy(task *t)
 	return 1;
 }
 
-taskstep* taskstep_create(const char *desc, point *dest, int (*act)(dwarf*))
+void taskstep_append(task *t, taskstep *step)
 {
+	taskstep* last = t->steps;
+	if (last == NULL) {
+		t->steps = step;
+		return;
+	}
+
+	while (last->next != NULL)
+		last = last->next;
+	last->next = step;
+}
+
+taskstep* taskstep_create_move(task *t, const char* desc, point *dest)
+{
+	if (t == NULL)
+		return NULL;
+
 	taskstep* step = malloc(sizeof(taskstep));
+	step->steptype = STEPTYPE_MOVE;
 	step->desc = desc;
-	memcpy(&step->dest, dest, sizeof(point));
-	step->act = act;
+	memcpy(&step->details.dest, dest, sizeof(point));
 	step->next = NULL;
+
+	taskstep_append(t, step);
+
+	return step;
+}
+
+taskstep* taskstep_create_act(task *t, const char* desc, int (*act)(dwarf*))
+{
+	if (t == NULL)
+		return NULL;
+
+	taskstep* step = malloc(sizeof(taskstep));
+	step->steptype = STEPTYPE_ACT;
+	step->desc = desc;
+	step->details.act = act;
+	step->next = NULL;
+
+	taskstep_append(t, step);
+
+	return step;
+}
+
+taskstep* taskstep_create_wait(task *t, const char* desc, float secs)
+{
+	if (t == NULL)
+		return NULL;
+
+	taskstep* step = malloc(sizeof(taskstep));
+	step->steptype = STEPTYPE_WAIT;
+	step->desc = desc;
+	step->details.wait = secs;
+	step->next = NULL;
+
+	taskstep_append(t, step);
+
 	return step;
 }

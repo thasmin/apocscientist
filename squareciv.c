@@ -73,9 +73,11 @@ int pour_bucket_well_recreate(dwarf *d)
 	if (well == NULL)
 		return 0;
 
-	task_destroy_steps(d->curr_task);
-	d->curr_task->steps = taskstep_create("Getting a bucket", bucket, dwarf_pickup);
-	d->curr_task->steps->next = taskstep_create("Going to the well", well, dwarf_consume);
+	task_reset(d->curr_task);
+	taskstep_create_move(d->curr_task, "Moving to a bucket", bucket);
+	taskstep_create_act(d->curr_task, "Picking up a bucket", dwarf_pickup);
+	taskstep_create_move(d->curr_task, "Moving to a well", well);
+	taskstep_create_act(d->curr_task, "Pouring out the bucket", dwarf_consume);
 	return 1;
 }
 
@@ -89,14 +91,14 @@ void setup_tasks()
 	if (well == NULL)
 		return;
 
-	task *t = malloc(sizeof(task));
-	t->desc = "Pour bucket into well";
-	t->recreate = pour_bucket_well_recreate;
-	t->destroy = task_destroy;
-	t->steps = taskstep_create("Getting a bucket", bucket, dwarf_pickup);
-	t->steps->next = taskstep_create("Going to the well", well, dwarf_consume);
-	guy.curr_task = t;
-	guy.curr_task->repeat = true;
+	guy.curr_task = malloc(sizeof(task));
+	task_init(guy.curr_task, "Pour bucket into well");
+	guy.curr_task->recreate = pour_bucket_well_recreate;
+	taskstep_create_move(guy.curr_task, "Moving to a bucket", bucket);
+	taskstep_create_act(guy.curr_task, "Picking up a bucket", dwarf_pickup);
+	taskstep_create_move(guy.curr_task, "Moving to a well", well);
+	taskstep_create_act(guy.curr_task, "Pouring out the bucket", dwarf_consume);
+	guy.curr_task->repeat = 1;
 }
 
 int main(int argc, char* argv[])
@@ -120,7 +122,7 @@ int main(int argc, char* argv[])
 	do {
 		TCOD_console_clear(NULL);
 
-		dwarf_act(&guy);
+		dwarf_act(&guy, TCOD_sys_get_last_frame_length());
 
 		for (i = 0; i < MAP_COLS; ++i)
 			for (j = 0; j < MAP_ROWS; ++j)

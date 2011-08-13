@@ -2,13 +2,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <tcod/libtcod.h>
 
 #include "task.h"
 #include "map.h"
 #include "building.h"
 
-void dwarf_act(dwarf *d)
+void dwarf_act(dwarf *d, float frameduration)
 {
 	// make sure dwarf has a task
 	if (d->curr_task == NULL)
@@ -18,21 +17,32 @@ void dwarf_act(dwarf *d)
 	if (d->curr_taskstep == NULL)
 		d->curr_taskstep = d->curr_task->steps;
 
-	// see if dwarf has arrived
-	if (point_equals(&d->p, &d->curr_taskstep->dest)) {
-		d->curr_taskstep->act(d);
-		d->curr_taskstep = d->curr_taskstep->next;
-		if (d->curr_taskstep == NULL) {
-			// if it's repeated try to recreate the task
-			if (!d->curr_task->repeat ||
-			    d->curr_task->recreate == NULL ||
-			    d->curr_task->recreate(d) == 0) {
-				d->curr_task->destroy(d->curr_task);
-				d->curr_task = NULL;
-			}
+	switch (d->curr_taskstep->steptype) {
+		case STEPTYPE_MOVE:
+			point_moveto(&d->p, &d->curr_taskstep->details.dest, d->speed * frameduration);
+			if (point_equals(&d->p, &d->curr_taskstep->details.dest))
+				d->curr_taskstep = d->curr_taskstep->next;
+			break;
+		case STEPTYPE_ACT:
+			d->curr_taskstep->details.act(d);
+			d->curr_taskstep = d->curr_taskstep->next;
+			break;
+		case STEPTYPE_WAIT:
+			d->curr_taskstep->details.wait -= frameduration;
+			if (d->curr_taskstep->details.wait <= 0)
+				d->curr_taskstep = d->curr_taskstep->next;
+			break;
+	}
+
+	// if we're done and we're not repeating or repeating failed, we're done
+	if (d->curr_taskstep == NULL) {
+	       	if (!d->curr_task->repeat || d->curr_task->recreate(d) == 0) {
+			d->curr_task->destroy(d->curr_task);
+			d->curr_task = NULL;
+		} else {
+			// repeat successful
+			d->curr_taskstep = d->curr_task->steps;
 		}
-	} else {
-		point_moveto(&d->p, &d->curr_taskstep->dest, d->speed * TCOD_sys_get_last_frame_length());
 	}
 }
 
@@ -58,8 +68,9 @@ int search_screw_recreate(dwarf *d)
 	point* screw = map_find_closest(&d->p, ITEM_SCREW);
 	if (screw == NULL)
 		return 0;
-	task_destroy_steps(d->curr_task);
-	d->curr_task->steps = taskstep_create("Searching for a screw", screw, dwarf_pickup);
+	task_reset(d->curr_task);
+	taskstep_create_move(d->curr_task, "Moving to a screw", screw);
+	taskstep_create_act(d->curr_task, "Picking up a screw", dwarf_pickup);
 	return 1;
 }
 
@@ -79,12 +90,13 @@ int dwarf_search(dwarf *d, int item)
 
 	point *where = map_find_closest(&d->p, item);
 	task* t = malloc(sizeof(task));
-	t->destroy = task_destroy;
+	task_init(t, NULL);
 	if (item == ITEM_SCREW)
 	{
 		t->desc = "Search for a screw";
 		t->recreate = search_screw_recreate;
-		t->steps = taskstep_create("Searching for a screw", where, dwarf_pickup);
+		taskstep_create_move(t, "Moving to a screw", where);
+		taskstep_create_act(t, "Picking up a screw", dwarf_pickup);
 	}
 	d->curr_task = t;
 	d->curr_taskstep = t->steps;
@@ -115,14 +127,12 @@ int dwarf_build(dwarf *d, int model, int x, int y)
 	tobuild_x = x;
 	tobuild_y = y;
 
-	task* t = malloc(sizeof(task));
-	t->desc = "Build a building";
-	t->recreate = NULL;
-	t->destroy = task_destroy;
-	t->repeat = 0;
+	d->curr_task = malloc(sizeof(task));
+	task_init(d->curr_task, "Build a building");
 	point p = { x+2, y+2 };
-	t->steps = taskstep_create("Searching for a screw", &p, build_building);
-	d->curr_task = t;
+	taskstep_create_move(d->curr_task, "Moving to the building site", &p);
+	taskstep_create_wait(d->curr_task, "Building", 3);
+	taskstep_create_act(d->curr_task, "Cutting the ribbon", build_building);
 	d->curr_taskstep = d->curr_task->steps;
 
 	return 1;

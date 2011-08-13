@@ -16,7 +16,7 @@ typedef struct {
 
 int dwarf_pickup(dwarf *d);
 int dwarf_consume(dwarf *d);
-void dwarf_act(dwarf *d);
+void dwarf_act(dwarf *d, float frameduration);
 
 int dwarf_search(dwarf *d, int item);
 int dwarf_build(dwarf *d, int model, int x, int y);
