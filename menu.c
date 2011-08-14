@@ -57,12 +57,13 @@ void menu_draw()
 		TCOD_console_print_left(NULL, 1, 4, TCOD_BKGND_NONE, "esc - back");
 		TCOD_console_hline(NULL, 1, 5, 28, TCOD_BKGND_NONE);
 	} else if (state == MENU_BUILD) {
-		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Build Menu");
-		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 3, TCOD_BKGND_NONE, "l - laboratory");
-		TCOD_console_print_left(NULL, 1, 4, TCOD_BKGND_NONE, "w - workshop");
-		TCOD_console_print_left(NULL, 1, 5, TCOD_BKGND_NONE, "esc - back");
-		TCOD_console_hline(NULL, 1, 6, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Build Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "l - laboratory");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "w - workshop");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - storage");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "esc - back");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 	} else if (state == MENU_MOVEBUILDING) {
 		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Building Placement Menu");
 		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);

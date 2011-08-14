@@ -192,11 +192,14 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_MOVEBUILDING);
 					point p = { 52, 22 };
 					temp_building = building_create(BUILDING_LABORATORY, &p);
-				}
-				else if (key.c == 'w' || key.c == 'W') {
+				} else if (key.c == 'w' || key.c == 'W') {
 					menu_set_state(MENU_MOVEBUILDING);
 					point p = { 52, 22 };
 					temp_building = building_create(BUILDING_WORKSHOP, &p);
+				} else if (key.c == 's' || key.c == 'S') {
+					menu_set_state(MENU_MOVEBUILDING);
+					point p = { 52, 22 };
+					temp_building = building_create(BUILDING_STORAGE, &p);
 				}
 			} else if (menu_get_state() == MENU_MOVEBUILDING) {
 				if (key.vk == TCODK_ESCAPE) {

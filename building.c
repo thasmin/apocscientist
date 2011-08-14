@@ -6,13 +6,15 @@ building* buildings;
 
 building_model models[] = {
 	{ BUILDING_LABORATORY, 5, 5, "Lab" },
-	{ BUILDING_WORKSHOP,   5, 5, "Wrk" }
+	{ BUILDING_WORKSHOP,   5, 5, "Wrk" },
+	{ BUILDING_STORAGE,    7, 7, "Stg" },
 };
 
 void buildings_init()
 {
 	models[BUILDING_LABORATORY].color = TCOD_yellow;
 	models[BUILDING_WORKSHOP].color = TCOD_green;
+	models[BUILDING_STORAGE].color = TCOD_blue;
 	buildings = NULL;
 }
 
@@ -24,6 +26,11 @@ void buildings_destroy()
 		next = b->next;
 		free(b);
 	}
+}
+
+building_model* building_get_model(int model)
+{
+	return &models[model];
 }
 
 building* building_create(int model, point *p)

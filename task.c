@@ -77,7 +77,11 @@ int task_build_act(dwarf *d, float frameduration)
 	// stage 0 is move
 	// stage 1 is delay
 	// stage 2 is build
-	point center = { data->where.x + 2, data->where.y + 2 };
+	building_model *model = building_get_model(data->model);
+	point center = {
+		data->where.x + model->width / 2,
+		data->where.y + model->height / 2
+	};
 	switch (t->stage) {
 		case 0:
 			point_moveto(&d->p, &center, d->speed * frameduration);

@@ -6,6 +6,7 @@
 
 #define BUILDING_LABORATORY	0
 #define BUILDING_WORKSHOP	1
+#define BUILDING_STORAGE	2
 
 typedef struct _building_model {
 	int model;
@@ -21,6 +22,8 @@ typedef struct _building {
 } building;
 
 void buildings_init();
+building_model* building_get_model(int model);
+
 void building_add(int model, point *p);
 building* building_create(int model, point *p);
 void building_draw(building *b);
