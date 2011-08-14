@@ -5,7 +5,7 @@ CFLAGS = -Wall -g
 
 all: squareciv
 
-squareciv: squareciv.c point.o dwarf.o task.o map.o menu.o building.o
+squareciv: squareciv.c point.o dwarf.o task.o map.o menu.o building.o orders.o
 	$(CC) $(CFLAGS)      -o $@ $^ -ltcod
 
 clean:

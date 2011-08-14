@@ -11,6 +11,7 @@
 #include "map.h"
 #include "menu.h"
 #include "building.h"
+#include "orders.h"
 
 #define CHAR_BUCKET 	207
 #define CHAR_WELL 	9
@@ -99,7 +100,7 @@ int task_pour_bucket_act(dwarf *d, float frameduration)
 	return 0;
 }
 
-void setup_tasks()
+void setup_orders()
 {
 	// set up guy to pour buckets on repeat
 	point* bucket = map_find_closest(&guy.p, ITEM_BUCKET);
@@ -109,27 +110,32 @@ void setup_tasks()
 	if (well == NULL)
 		return;
 
-	guy.curr_task = malloc(sizeof(task));
-	guy.curr_task->desc = "Build a building";
-	guy.curr_task->act = task_pour_bucket_act;
-	guy.curr_task->stage = 0;
-	guy.curr_task->localdata = malloc(sizeof(task_pour_bucket_data));
-	task_pour_bucket_data *data = (task_pour_bucket_data*)guy.curr_task->localdata;
+	task *t = malloc(sizeof(task));
+	t->desc = "Pour a bucket into a well";
+	t->assign = NULL;
+	t->act = task_pour_bucket_act;
+	t->stage = 0;
+	t->localdata = malloc(sizeof(task_pour_bucket_data));
+	task_pour_bucket_data *data = (task_pour_bucket_data*)t->localdata;
 	memcpy(&data->bucket, bucket, sizeof(point));
 	memcpy(&data->well, well, sizeof(point));
+
+	order_add(t);
 }
 
 int main(int argc, char* argv[])
 {
 	int i, j;
 
+	dwarves_init();
+	buildings_init();
+	orders_init();
+	temp_building = NULL;
+
 	//srand(time(NULL));
 	setup_map();
-	setup_tasks();
-	buildings_init();
-	temp_building = NULL;
-	point p = { 40, 40 };
-	building_add(BUILDING_LABORATORY, &p);
+	setup_orders();
+	dwarf_add(&guy);
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
@@ -141,7 +147,13 @@ int main(int argc, char* argv[])
 	do {
 		TCOD_console_clear(NULL);
 
-		dwarf_act(&guy, TCOD_sys_get_last_frame_length());
+		// give orders to idle dwarves
+		dwarf *d;
+		dwarf_reset_idle();
+		for (d = dwarf_next_idle(); d != NULL; d = dwarf_next_idle())
+			d->curr_task = order_next(d);
+
+		dwarves_act(TCOD_sys_get_last_frame_length());
 
 		for (i = 0; i < MAP_COLS; ++i)
 			for (j = 0; j < MAP_ROWS; ++j)
@@ -170,7 +182,7 @@ int main(int argc, char* argv[])
 				if (key.vk == TCODK_ESCAPE)
 					menu_set_state(MENU_NONE);
 				else if (key.c == 's' || key.c == 'S') {
-					dwarf_search(&guy, ITEM_SCREW);
+					order_add(task_search_create(ITEM_SCREW));
 					menu_set_state(MENU_NONE);
 				}
 			} else if (menu_get_state() == MENU_BUILD) {
@@ -192,10 +204,10 @@ int main(int argc, char* argv[])
 					temp_building = NULL;
 					menu_set_state(MENU_NONE);
 				} else if (key.vk == TCODK_ENTER) {
-					dwarf_build(&guy,
+					order_add(task_build_create(
 						temp_building->model->model,
 						temp_building->x,
-						temp_building->y);
+						temp_building->y));
 					free(temp_building);
 					temp_building = NULL;
 					menu_set_state(MENU_NONE);

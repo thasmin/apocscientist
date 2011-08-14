@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <tcod/libtcod.h>
 
+#include "orders.h"
 #include "dwarf.h"
 #include "task.h"
 
@@ -28,20 +29,27 @@ void menu_set_state(menu_state new_state)
 void menu_draw()
 {
 	// draw menu
+	int linenum = 1;
 	TCOD_console_print_frame(NULL, 0, 0, 30, 50, false, TCOD_BKGND_NONE, NULL);
 	if (state == MENU_NONE)
 	{
-		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Menu");
-		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 3, TCOD_BKGND_NONE, "b - build");
-		TCOD_console_print_left(NULL, 1, 4, TCOD_BKGND_NONE, "s - search");
-		TCOD_console_print_left(NULL, 1, 5, TCOD_BKGND_NONE, "q - quit");
-		TCOD_console_hline(NULL, 1, 6, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 7, TCOD_BKGND_NONE, "The dwarf is...");
-		if (guy.curr_taskstep != NULL)
-			TCOD_console_print_left(NULL, 3, 8, TCOD_BKGND_NONE, guy.curr_taskstep->desc);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "b - build");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - search");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "q - quit");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "The dwarf is...");
+		if (guy.curr_task != NULL)
+			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, guy.curr_task->desc);
 		else
-			TCOD_console_print_left(NULL, 3, 8, TCOD_BKGND_NONE, "doing nothing");
+			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, "doing nothing");
+		linenum++;
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Orders");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		order *o;
+		for (o = orders_list(); o != NULL; o = o->next)
+			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, o->task->desc);
 	} else if (state == MENU_SEARCH) {
 		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Search Menu");
 		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);
