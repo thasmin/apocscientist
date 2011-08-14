@@ -11,7 +11,6 @@ typedef struct {
 	int speed;
 	int carrying;
 	struct _task *curr_task;
-	struct _taskstep *curr_taskstep;
 } dwarf;
 
 int dwarf_pickup(dwarf *d);

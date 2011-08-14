@@ -63,22 +63,40 @@ void destroy_map()
 	}
 }
 
-int pour_bucket_well_recreate(dwarf *d)
-{
-	// set up guy to pour buckets on repeat
-	point* bucket = map_find_closest(&d->p, ITEM_BUCKET);
-	if (bucket == NULL)
-		return 0;
-	point* well = map_find_closest(&d->p, ITEM_WELL);
-	if (well == NULL)
-		return 0;
+typedef struct {
+	point bucket;
+	point well;
+} task_pour_bucket_data;
 
-	task_reset(d->curr_task);
-	taskstep_create_move(d->curr_task, "Moving to a bucket", bucket);
-	taskstep_create_act(d->curr_task, "Picking up a bucket", dwarf_pickup);
-	taskstep_create_move(d->curr_task, "Moving to a well", well);
-	taskstep_create_act(d->curr_task, "Pouring out the bucket", dwarf_consume);
-	return 1;
+int task_pour_bucket_act(dwarf *d, float frameduration)
+{
+	task *t = d->curr_task;
+	task_pour_bucket_data* data = (task_pour_bucket_data*)t->localdata;
+
+	// stage 0 is move to bucket
+	// stage 1 is picket bucket
+	// stage 2 is move to well
+	// stage 3 is pour bucket
+	switch (t->stage) {
+		case 0:
+			point_moveto(&guy.p, &data->bucket, d->speed * frameduration);
+			if (point_equals(&guy.p, &data->bucket))
+				t->stage++;
+			return 1;
+		case 1:
+			dwarf_pickup(&guy);
+			t->stage++;
+			return 1;
+		case 2:
+			point_moveto(&guy.p, &data->well, d->speed * frameduration);
+			if (point_equals(&guy.p, &data->well))
+				t->stage++;
+			return 1;
+		case 3:
+			dwarf_consume(&guy);
+			return 0;
+	}
+	return 0;
 }
 
 void setup_tasks()
@@ -92,13 +110,13 @@ void setup_tasks()
 		return;
 
 	guy.curr_task = malloc(sizeof(task));
-	task_init(guy.curr_task, "Pour bucket into well");
-	guy.curr_task->recreate = pour_bucket_well_recreate;
-	taskstep_create_move(guy.curr_task, "Moving to a bucket", bucket);
-	taskstep_create_act(guy.curr_task, "Picking up a bucket", dwarf_pickup);
-	taskstep_create_move(guy.curr_task, "Moving to a well", well);
-	taskstep_create_act(guy.curr_task, "Pouring out the bucket", dwarf_consume);
-	guy.curr_task->repeat = 1;
+	guy.curr_task->desc = "Build a building";
+	guy.curr_task->act = task_pour_bucket_act;
+	guy.curr_task->stage = 0;
+	guy.curr_task->localdata = malloc(sizeof(task_pour_bucket_data));
+	task_pour_bucket_data *data = (task_pour_bucket_data*)guy.curr_task->localdata;
+	memcpy(&data->bucket, bucket, sizeof(point));
+	memcpy(&data->well, well, sizeof(point));
 }
 
 int main(int argc, char* argv[])
@@ -110,7 +128,8 @@ int main(int argc, char* argv[])
 	setup_tasks();
 	buildings_init();
 	temp_building = NULL;
-	building_add(BUILDING_LABORATORY, 40, 40);
+	point p = { 40, 40 };
+	building_add(BUILDING_LABORATORY, &p);
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
@@ -159,11 +178,13 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_NONE);
 				else if (key.c == 'l' || key.c == 'L') {
 					menu_set_state(MENU_MOVEBUILDING);
-					temp_building = building_create(BUILDING_LABORATORY, 52, 22);
+					point p = { 52, 22 };
+					temp_building = building_create(BUILDING_LABORATORY, &p);
 				}
 				else if (key.c == 'w' || key.c == 'W') {
 					menu_set_state(MENU_MOVEBUILDING);
-					temp_building = building_create(BUILDING_WORKSHOP, 52, 22);
+					point p = { 52, 22 };
+					temp_building = building_create(BUILDING_WORKSHOP, &p);
 				}
 			} else if (menu_get_state() == MENU_MOVEBUILDING) {
 				if (key.vk == TCODK_ESCAPE) {

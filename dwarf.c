@@ -12,7 +12,10 @@ void dwarf_act(dwarf *d, float frameduration)
 	// make sure dwarf has a task
 	if (d->curr_task == NULL)
 		return;
+	d->curr_task->act(d, frameduration);
+	return;
 
+	/*
 	// see if dwarf has started it yet
 	if (d->curr_taskstep == NULL)
 		d->curr_taskstep = d->curr_task->steps;
@@ -44,6 +47,7 @@ void dwarf_act(dwarf *d, float frameduration)
 			d->curr_taskstep = d->curr_task->steps;
 		}
 	}
+	*/
 }
 
 int dwarf_pickup(dwarf *d)
@@ -63,15 +67,24 @@ int dwarf_consume(dwarf *d)
 	return 1;
 }
 
-int search_screw_recreate(dwarf *d)
+int task_search_act(dwarf *d, float frameduration)
 {
-	point* screw = map_find_closest(&d->p, ITEM_SCREW);
-	if (screw == NULL)
-		return 0;
-	task_reset(d->curr_task);
-	taskstep_create_move(d->curr_task, "Moving to a screw", screw);
-	taskstep_create_act(d->curr_task, "Picking up a screw", dwarf_pickup);
-	return 1;
+	task *t = d->curr_task;
+	point* where = (point*)t->localdata;
+
+	// stage 0 is move
+	// stage 1 is pickup
+	switch (t->stage) {
+		case 0:
+			point_moveto(&d->p, where, d->speed * frameduration);
+			if (point_equals(&d->p, where))
+				t->stage++;
+			return 1;
+		case 1:
+			dwarf_pickup(d);
+			return 0;
+	}
+	return 0;
 }
 
 int dwarf_search(dwarf *d, int item)
@@ -81,7 +94,7 @@ int dwarf_search(dwarf *d, int item)
 		return 0;
 
 	if (d->curr_task != NULL)
-		d->curr_task->destroy(d->curr_task);
+		task_destroy(d->curr_task);
 
 	if (d->carrying != ITEM_NONE) {
 		map_drop_item(&d->p, d->carrying);
@@ -89,32 +102,54 @@ int dwarf_search(dwarf *d, int item)
 	}
 
 	point *where = map_find_closest(&d->p, item);
-	task* t = malloc(sizeof(task));
-	task_init(t, NULL);
+	d->curr_task = malloc(sizeof(task));
 	if (item == ITEM_SCREW)
-	{
-		t->desc = "Search for a screw";
-		t->recreate = search_screw_recreate;
-		taskstep_create_move(t, "Moving to a screw", where);
-		taskstep_create_act(t, "Picking up a screw", dwarf_pickup);
-	}
-	d->curr_task = t;
-	d->curr_taskstep = t->steps;
+		d->curr_task->desc = "Search for a screw";
+	d->curr_task->act = task_search_act;
+	d->curr_task->localdata = malloc(sizeof(point));
+	d->curr_task->stage = 0;
+	memcpy(d->curr_task->localdata, where, sizeof(point));
 
 	return 1;
 }
 
-int tobuild_model, tobuild_x, tobuild_y;
-int build_building(dwarf *d)
+typedef struct {
+	point where;
+	int model;
+	float delay;
+} task_build_data;
+
+int task_build_act(dwarf *d, float frameduration)
 {
-	building_add(tobuild_model, tobuild_x, tobuild_y);
-	return 1;
+	task *t = d->curr_task;
+	task_build_data* data = (task_build_data*)t->localdata;
+
+	// stage 0 is move
+	// stage 1 is delay
+	// stage 2 is build
+	point center = { data->where.x + 2, data->where.y + 2 };
+	switch (t->stage) {
+		case 0:
+			point_moveto(&d->p, &center, d->speed * frameduration);
+			if (point_equals(&d->p, &center))
+				t->stage++;
+			return 1;
+		case 1:
+			data->delay -= frameduration;
+			if (data->delay <= 0)
+				t->stage++;
+			return 1;
+		case 2:
+			building_add(data->model, &data->where);
+			return 0;
+	}
+	return 0;
 }
 
 int dwarf_build(dwarf *d, int model, int x, int y)
 {
 	if (d->curr_task != NULL)
-		d->curr_task->destroy(d->curr_task);
+		task_destroy(d->curr_task);
 
 	// TODO: validate building site
 
@@ -123,17 +158,16 @@ int dwarf_build(dwarf *d, int model, int x, int y)
 		d->carrying = ITEM_NONE;
 	}
 
-	tobuild_model = model;
-	tobuild_x = x;
-	tobuild_y = y;
-
 	d->curr_task = malloc(sizeof(task));
-	task_init(d->curr_task, "Build a building");
-	point p = { x+2, y+2 };
-	taskstep_create_move(d->curr_task, "Moving to the building site", &p);
-	taskstep_create_wait(d->curr_task, "Building", 3);
-	taskstep_create_act(d->curr_task, "Cutting the ribbon", build_building);
-	d->curr_taskstep = d->curr_task->steps;
+	d->curr_task->desc = "Build a building";
+	d->curr_task->act = task_build_act;
+	d->curr_task->stage = 0;
+	d->curr_task->localdata = malloc(sizeof(task_build_data));
+	task_build_data *data = (task_build_data*)d->curr_task->localdata;
+	data->where.x = x;
+	data->where.y = y;
+	data->model = model;
+	data->delay = 2;
 
 	return 1;
 }

@@ -2,6 +2,7 @@
 #define BUILDING_H
 
 #include <tcod/libtcod.h>
+#include "point.h"
 
 #define BUILDING_LABORATORY	0
 #define BUILDING_WORKSHOP	1
@@ -20,8 +21,8 @@ typedef struct _building {
 } building;
 
 void buildings_init();
-void building_add(int model, int x, int y);
-building* building_create(int model, int x, int y);
+void building_add(int model, point *p);
+building* building_create(int model, point *p);
 void building_draw(building *b);
 void buildings_draw();
 

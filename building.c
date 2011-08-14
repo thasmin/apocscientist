@@ -26,19 +26,19 @@ void buildings_destroy()
 	}
 }
 
-building* building_create(int model, int x, int y)
+building* building_create(int model, point *p)
 {
 	building *b = malloc(sizeof(building));
 	b->model = &models[model];
-	b->x = x;
-	b->y = y;
+	b->x = p->x;
+	b->y = p->y;
 	b->next = buildings;
 	return b;
 }
 
-void building_add(int model, int x, int y)
+void building_add(int model, point *p)
 {
-	building *b = building_create(model, x, y);
+	building *b = building_create(model, p);
 	b->next = buildings;
 	buildings = b;
 }
