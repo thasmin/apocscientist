@@ -43,6 +43,9 @@ int task_search_assign(task *t, dwarf *d)
 	task_search_data *taskdata = (task_search_data*)t->localdata;
 	point *where = map_find_closest(&d->p, taskdata->item);
 	memcpy(&taskdata->where, where, sizeof(point));
+
+	dwarf_drop_item(d);
+
 	return 1;
 }
 
@@ -68,7 +71,7 @@ typedef struct {
 
 int task_build_act(dwarf *d, float frameduration)
 {
-	task *t = t;
+	task *t = d->curr_task;
 	task_build_data* data = (task_build_data*)t->localdata;
 
 	// stage 0 is move

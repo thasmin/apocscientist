@@ -68,6 +68,15 @@ int dwarf_pickup(dwarf *d)
 	return 1;
 }
 
+int dwarf_drop_item(dwarf *d)
+{
+	if (d->carrying == ITEM_NONE)
+		return 0;
+	map_drop_item(&d->p, d->carrying);
+	d->carrying = ITEM_NONE;
+	return 1;
+}
+
 int dwarf_consume(dwarf *d)
 {
 	if (d->carrying == ITEM_NONE)

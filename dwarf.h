@@ -20,6 +20,7 @@ dwarf* dwarf_next_idle();
 void dwarves_act(float frameduration);
 
 int dwarf_pickup(dwarf *d);
+int dwarf_drop_item(dwarf *d);
 int dwarf_consume(dwarf *d);
 void dwarf_act(dwarf *d, float frameduration);
 

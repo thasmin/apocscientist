@@ -15,11 +15,10 @@ void order_add(task* t)
 	if (pending == NULL) {
 		o->next = NULL;
 		pending = o;
-		return;
+	} else {
+		o->next = pending;
+		pending = o;
 	}
-
-	o->next = pending;
-	pending = o;
 }
 
 order* orders_list()
