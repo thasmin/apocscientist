@@ -12,11 +12,16 @@
 #define ITEM_SCREW	3
 #define ITEM_COUNT	4
 
+void map_init();
+
 int mapindex(int x, int y);
 int point_mapindex(point *p);
 
 int map_item_at(int x, int y);
 point_node *map_item_list(int item);
+
+void storage_add(int item);
+unsigned storage_get_count(int item);
 
 point* map_find_closest(point *p, int item);
 int map_create_item(int x, int y, int item);

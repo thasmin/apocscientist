@@ -17,7 +17,7 @@ typedef struct _building_model {
 
 typedef struct _building {
 	building_model *model;
-	int x, y;
+	point p;
 	struct _building *next;
 } building;
 
@@ -28,5 +28,8 @@ void building_add(int model, point *p);
 building* building_create(int model, point *p);
 void building_draw(building *b);
 void buildings_draw();
+
+building* building_find_closest(point *p, int model);
+void building_adjust_to_center(building *b, point *p);
 
 #endif

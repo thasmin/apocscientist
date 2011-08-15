@@ -127,6 +127,7 @@ int main(int argc, char* argv[])
 {
 	int i, j;
 
+	map_init();
 	dwarves_init();
 	buildings_init();
 	orders_init();
@@ -209,19 +210,19 @@ int main(int argc, char* argv[])
 				} else if (key.vk == TCODK_ENTER) {
 					order_add(task_build_create(
 						temp_building->model->model,
-						temp_building->x,
-						temp_building->y));
+						temp_building->p.x,
+						temp_building->p.y));
 					free(temp_building);
 					temp_building = NULL;
 					menu_set_state(MENU_NONE);
 				} else if (key.vk == TCODK_UP)
-					temp_building->y -= 1;
+					temp_building->p.y -= 1;
 				else if (key.vk == TCODK_DOWN)
-					temp_building->y += 1;
+					temp_building->p.y += 1;
 				else if (key.vk == TCODK_LEFT)
-					temp_building->x -= 1;
+					temp_building->p.x -= 1;
 				else if (key.vk == TCODK_RIGHT)
-					temp_building->x += 1;
+					temp_building->p.x += 1;
 			}
 		}
 	} while (!TCOD_console_is_window_closed());

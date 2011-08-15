@@ -15,7 +15,8 @@ int task_destroy(task *t)
 
 typedef struct {
 	int item;
-	point where;
+	point item_p;
+	point storage_p;
 } task_search_data;
 
 int task_search_act(dwarf *d, float frameduration)
@@ -25,14 +26,32 @@ int task_search_act(dwarf *d, float frameduration)
 
 	// stage 0 is move
 	// stage 1 is pickup
+	// stage 2 is move to storage
+	// stage 3 is add item to storage
 	switch (t->stage) {
 		case 0:
-			point_moveto(&d->p, &data->where, d->speed * frameduration);
-			if (point_equals(&d->p, &data->where))
+			point_moveto(&d->p, &data->item_p, d->speed * frameduration);
+			if (point_equals(&d->p, &data->item_p))
 				t->stage++;
 			return 1;
 		case 1:
 			dwarf_pickup(d);
+			memcpy(&data->storage_p, 
+				&building_find_closest(&data->item_p, BUILDING_STORAGE)->p, 
+				sizeof(point));
+			building_adjust_to_center(
+				building_find_closest(&data->item_p, BUILDING_STORAGE),
+				&data->storage_p);
+			t->stage++;
+			return 1;
+		case 2:
+			point_moveto(&d->p, &data->storage_p, d->speed * frameduration);
+			if (point_equals(&d->p, &data->storage_p))
+				t->stage++;
+			return 1;
+		case 3:
+			storage_add(data->item);
+			dwarf_consume(d);
 			return 0;
 	}
 	return 0;
@@ -42,7 +61,7 @@ int task_search_assign(task *t, dwarf *d)
 {
 	task_search_data *taskdata = (task_search_data*)t->localdata;
 	point *where = map_find_closest(&d->p, taskdata->item);
-	memcpy(&taskdata->where, where, sizeof(point));
+	memcpy(&taskdata->item_p, where, sizeof(point));
 
 	dwarf_drop_item(d);
 

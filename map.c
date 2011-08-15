@@ -1,14 +1,17 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "map.h"
 
-/*
-point_node *buckets;
-point_node *wells;
-point_node **items[] = { 0, &buckets, &wells };
-*/
-point_node *items[] = { NULL, NULL, NULL };
+point_node *items[ITEM_COUNT];
 int map[MAP_COLS * MAP_ROWS];
+unsigned storage[ITEM_COUNT];
+
+void map_init()
+{
+	memset(items, 0, sizeof(point_node*) * ITEM_COUNT);
+	memset(storage, 0, sizeof(unsigned) * ITEM_COUNT);
+}
 
 inline int mapindex(int x, int y)
 {
@@ -94,4 +97,14 @@ point* map_find_closest(point *p, int item)
 		pn = pn->next;
 	}
 	return closest_bucket;
+}
+
+void storage_add(int item)
+{
+	++storage[item];
+}
+
+unsigned storage_get_count(int item)
+{
+	return storage[item];
 }

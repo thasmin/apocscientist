@@ -1,6 +1,8 @@
 #include "building.h"
 
+#include <string.h>
 #include <malloc.h>
+#include <limits.h>
 
 building* buildings;
 
@@ -37,8 +39,7 @@ building* building_create(int model, point *p)
 {
 	building *b = malloc(sizeof(building));
 	b->model = &models[model];
-	b->x = p->x;
-	b->y = p->y;
+	memcpy(&b->p, p, sizeof(point));
 	b->next = buildings;
 	return b;
 }
@@ -54,10 +55,10 @@ void building_draw(building *b)
 {
 	TCOD_color_t old_color = TCOD_console_get_foreground_color(NULL);
 	TCOD_console_set_foreground_color(NULL, b->model->color);
-	TCOD_console_print_frame(NULL, b->x, b->y,
+	TCOD_console_print_frame(NULL, b->p.x, b->p.y,
 		b->model->width, b->model->height,
 		false, TCOD_BKGND_NONE, NULL);
-	TCOD_console_print_left(NULL, b->x + 1, b->y, TCOD_BKGND_NONE, b->model->code);
+	TCOD_console_print_left(NULL, b->p.x + 1, b->p.y, TCOD_BKGND_NONE, b->model->code);
 	TCOD_console_set_foreground_color(NULL, old_color);
 }
 
@@ -65,4 +66,28 @@ void buildings_draw()
 {
 	for (building *b = buildings; b != NULL; b = b->next)
 		building_draw(b);
+}
+
+building* building_find_closest(point *p, int model)
+{
+	building *closest = NULL;
+	float closest_dist = INT_MAX;
+	for (building *b = buildings; b != NULL; b = b->next)
+	{
+		if (b->model->model != model)
+			continue;
+		float dist = point_dist(&b->p, p);
+		if (dist < closest_dist) {
+			closest = b;
+			closest_dist = dist;
+		}
+	}
+	return closest;
+}
+
+// warning: returning a struct by value
+void building_adjust_to_center(building *b, point *p)
+{
+	p->x += b->model->width / 2;
+	p->y += b->model->height / 2;
 }
