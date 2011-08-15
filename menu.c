@@ -6,6 +6,7 @@
 #include "orders.h"
 #include "dwarf.h"
 #include "task.h"
+#include "map.h"
 
 extern dwarf guy;
 
@@ -44,12 +45,23 @@ void menu_draw()
 			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, guy.curr_task->desc);
 		else
 			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, "doing nothing");
+
+		// print orders
 		linenum++;
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Orders");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		order *o;
 		for (o = orders_list(); o != NULL; o = o->next)
 			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, o->task->desc);
+
+		// print storage
+		linenum++;
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Storage");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		int i;
+		for (i = 0; i < ITEM_COUNT; ++i)
+			if (i == ITEM_SCREW && storage_get_count(i) > 0)
+				TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Screws: %d", storage_get_count(i));
 	} else if (state == MENU_SEARCH) {
 		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Search Menu");
 		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);

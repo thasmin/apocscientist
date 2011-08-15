@@ -16,6 +16,7 @@ int task_destroy(task *t)
 typedef struct {
 	int item;
 	point item_p;
+	building* storage;
 	point storage_p;
 } task_search_data;
 
@@ -36,12 +37,11 @@ int task_search_act(dwarf *d, float frameduration)
 			return 1;
 		case 1:
 			dwarf_pickup(d);
-			memcpy(&data->storage_p, 
-				&building_find_closest(&data->item_p, BUILDING_STORAGE)->p, 
-				sizeof(point));
-			building_adjust_to_center(
-				building_find_closest(&data->item_p, BUILDING_STORAGE),
-				&data->storage_p);
+			data->storage = building_find_closest(&data->item_p, BUILDING_STORAGE);
+			if (data->storage == NULL)
+				return 0;
+			memcpy(&data->storage_p, &data->storage->p, sizeof(point));
+			building_adjust_to_center(data->storage, &data->storage_p);
 			t->stage++;
 			return 1;
 		case 2:
