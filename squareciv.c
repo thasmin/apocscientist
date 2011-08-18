@@ -112,7 +112,6 @@ void setup_orders()
 
 	task *t = malloc(sizeof(task));
 	t->desc = "Pour a bucket into a well";
-	t->assign = NULL;
 	t->act = task_pour_bucket_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_pour_bucket_data));
@@ -127,6 +126,7 @@ int main(int argc, char* argv[])
 {
 	int i, j;
 
+	research_init();
 	map_init();
 	dwarves_init();
 	buildings_init();
@@ -179,6 +179,8 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_SEARCH);
 				else if (key.c == 'b' || key.c == 'B')
 					menu_set_state(MENU_BUILD);
+				else if (key.c == 'r' || key.c == 'R')
+					menu_set_state(MENU_RESEARCH);
 			} else if (menu_get_state() == MENU_SEARCH) {
 				if (key.vk == TCODK_ESCAPE)
 					menu_set_state(MENU_NONE);
@@ -201,6 +203,12 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_MOVEBUILDING);
 					point p = { 52, 22 };
 					temp_building = building_create(BUILDING_STORAGE, &p);
+				} else if (key.c == 'g' || key.c == 'G') {
+					menu_set_state(MENU_NONE);
+					if (research_is_completed(RESEARCH_ROBOT_GATHERER) &&
+						building_model_exists(BUILDING_WORKSHOP)) {
+						// TODO: build a gatherer robot
+					}
 				}
 			} else if (menu_get_state() == MENU_MOVEBUILDING) {
 				if (key.vk == TCODK_ESCAPE) {
@@ -223,6 +231,13 @@ int main(int argc, char* argv[])
 					temp_building->p.x -= 1;
 				else if (key.vk == TCODK_RIGHT)
 					temp_building->p.x += 1;
+			} else if (menu_get_state() == MENU_RESEARCH) {
+				if (key.vk == TCODK_ESCAPE)
+					menu_set_state(MENU_NONE);
+				else if (key.c == 'g' || key.c == 'G') {
+					order_add(task_research_create(RESEARCH_ROBOT_GATHERER));
+					menu_set_state(MENU_NONE);
+				}
 			}
 		}
 	} while (!TCOD_console_is_window_closed());

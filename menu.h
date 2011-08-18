@@ -6,6 +6,7 @@ typedef enum {
 	MENU_SEARCH,
 	MENU_BUILD,
 	MENU_MOVEBUILDING,
+	MENU_RESEARCH,
 } menu_state;
 
 void menu_init();

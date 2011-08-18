@@ -33,8 +33,6 @@ task* order_next(dwarf *d)
 
 	order *togive = pending;
 	pending = pending->next;
-	if (togive->task->assign != NULL)
-		togive->task->assign(togive->task, d);
 	return togive->task;
 }
 

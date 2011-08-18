@@ -31,5 +31,6 @@ void buildings_draw();
 
 building* building_find_closest(point *p, int model);
 void building_adjust_to_center(building *b, point *p);
+int building_model_exists(int model);
 
 #endif

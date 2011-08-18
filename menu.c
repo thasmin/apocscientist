@@ -7,6 +7,7 @@
 #include "dwarf.h"
 #include "task.h"
 #include "map.h"
+#include "building.h"
 
 extern dwarf guy;
 
@@ -38,6 +39,8 @@ void menu_draw()
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "b - build");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - search");
+		if (building_model_exists(BUILDING_LABORATORY))
+			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - research");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "q - quit");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "The dwarf is...");
@@ -63,28 +66,41 @@ void menu_draw()
 			if (i == ITEM_SCREW && storage_get_count(i) > 0)
 				TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Screws: %d", storage_get_count(i));
 	} else if (state == MENU_SEARCH) {
-		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Search Menu");
-		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 3, TCOD_BKGND_NONE, "s - screws");
-		TCOD_console_print_left(NULL, 1, 4, TCOD_BKGND_NONE, "esc - back");
-		TCOD_console_hline(NULL, 1, 5, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Search Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - screws");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "esc - back");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 	} else if (state == MENU_BUILD) {
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Build Menu");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "l - laboratory");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "w - workshop");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - storage");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		if (research_is_completed(RESEARCH_ROBOT_GATHERER) && building_model_exists(BUILDING_WORKSHOP)) {
+			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "g - gatherer robot");
+			TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		}
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "esc - back");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 	} else if (state == MENU_MOVEBUILDING) {
-		TCOD_console_print_left(NULL, 1, 1, TCOD_BKGND_NONE, "Building Placement Menu");
-		TCOD_console_hline(NULL, 1, 2, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 3, TCOD_BKGND_NONE, "up - move building");
-		TCOD_console_print_left(NULL, 1, 4, TCOD_BKGND_NONE, "down - move building");
-		TCOD_console_print_left(NULL, 1, 5, TCOD_BKGND_NONE, "left - move building");
-		TCOD_console_print_left(NULL, 1, 6, TCOD_BKGND_NONE, "right - move building");
-		TCOD_console_print_left(NULL, 1, 7, TCOD_BKGND_NONE, "enter - place building");
-		TCOD_console_hline(NULL, 1, 8, 28, TCOD_BKGND_NONE);
-		TCOD_console_print_left(NULL, 1, 9, TCOD_BKGND_NONE, "esc - back");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Building Placement Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "up - move building");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "down - move building");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "left - move building");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "right - move building");
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "enter - place building");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "esc - back");
+	} else if (state == MENU_RESEARCH) {
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "Research Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "g - gatherer");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "esc - back");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 	}
 }

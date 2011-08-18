@@ -5,6 +5,9 @@
 
 struct _task;
 
+#define ROBOT_GENIUS	0
+#define ROBOT_GATHERER	1
+
 typedef struct _dwarf {
 	point p;
 	int speed;

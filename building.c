@@ -91,3 +91,11 @@ void building_adjust_to_center(building *b, point *p)
 	p->x += b->model->width / 2;
 	p->y += b->model->height / 2;
 }
+
+int building_model_exists(int model)
+{
+	for (building *b = buildings; b != NULL; b = b->next)
+		if (b->model->model == model)
+			return 1;
+	return 0;
+}
