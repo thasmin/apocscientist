@@ -33,7 +33,7 @@ typedef struct {
 	point storage_p;
 } task_search_data;
 
-int task_search_act(dwarf *d, float frameduration)
+int task_search_act(robot *d, float frameduration)
 {
 	task *t = d->curr_task;
 	task_search_data* data = (task_search_data*)t->localdata;
@@ -47,7 +47,7 @@ int task_search_act(dwarf *d, float frameduration)
 	{
 		point *where = map_find_closest(&d->p, data->item);
 		memcpy(&data->item_p, where, sizeof(point));
-		dwarf_drop_item(d);
+		robot_drop_item(d);
 		t->stage++;
 	}
 	switch (t->stage) {
@@ -57,7 +57,7 @@ int task_search_act(dwarf *d, float frameduration)
 				t->stage++;
 			return 1;
 		case 2:
-			dwarf_pickup(d);
+			robot_pickup(d);
 			data->storage = building_find_closest(&data->item_p, BUILDING_STORAGE);
 			if (data->storage == NULL)
 				return 0;
@@ -72,7 +72,7 @@ int task_search_act(dwarf *d, float frameduration)
 			return 1;
 		case 4:
 			storage_add(data->item);
-			dwarf_consume(d);
+			robot_consume(d);
 			return 0;
 	}
 	return 0;
@@ -97,7 +97,7 @@ typedef struct {
 	float delay;
 } task_build_data;
 
-int task_build_act(dwarf *d, float frameduration)
+int task_build_act(robot *d, float frameduration)
 {
 	task *t = d->curr_task;
 	task_build_data* data = (task_build_data*)t->localdata;
@@ -149,7 +149,7 @@ typedef struct {
 	int research_time;
 } task_research_data;
 
-int task_research_act(dwarf *d, float frameduration)
+int task_research_act(robot *d, float frameduration)
 {
 	task *t = d->curr_task;
 	task_research_data* data = (task_research_data*)t->localdata;

@@ -6,7 +6,7 @@
 #include <tcod/libtcod.h>
 
 #include "point.h"
-#include "dwarf.h"
+#include "robot.h"
 #include "task.h"
 #include "map.h"
 #include "menu.h"
@@ -22,7 +22,7 @@ int symbols[ITEM_COUNT];
 building *temp_building;
 
 // guy starts at 40,10 and has 12 speed
-dwarf guy = { { 40, 10 }, 12 };
+robot guy = { { 40, 10 }, 12 };
 
 void setup_map()
 {
@@ -69,7 +69,7 @@ typedef struct {
 	point well;
 } task_pour_bucket_data;
 
-int task_pour_bucket_act(dwarf *d, float frameduration)
+int task_pour_bucket_act(robot *d, float frameduration)
 {
 	task *t = d->curr_task;
 	task_pour_bucket_data* data = (task_pour_bucket_data*)t->localdata;
@@ -85,7 +85,7 @@ int task_pour_bucket_act(dwarf *d, float frameduration)
 				t->stage++;
 			return 1;
 		case 1:
-			dwarf_pickup(&guy);
+			robot_pickup(&guy);
 			t->stage++;
 			return 1;
 		case 2:
@@ -94,7 +94,7 @@ int task_pour_bucket_act(dwarf *d, float frameduration)
 				t->stage++;
 			return 1;
 		case 3:
-			dwarf_consume(&guy);
+			robot_consume(&guy);
 			return 0;
 	}
 	return 0;
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 
 	research_init();
 	map_init();
-	dwarves_init();
+	robots_init();
 	buildings_init();
 	orders_init();
 	temp_building = NULL;
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 	//srand(time(NULL));
 	setup_map();
 	setup_orders();
-	dwarf_add(&guy);
+	robot_add(&guy);
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
@@ -148,13 +148,13 @@ int main(int argc, char* argv[])
 	do {
 		TCOD_console_clear(NULL);
 
-		// give orders to idle dwarves
-		dwarf *d;
-		dwarf_reset_idle();
-		for (d = dwarf_next_idle(); d != NULL; d = dwarf_next_idle())
+		// give orders to idle robots
+		robot *d;
+		robot_reset_idle();
+		for (d = robot_next_idle(); d != NULL; d = robot_next_idle())
 			d->curr_task = order_next(d);
 
-		dwarves_act(TCOD_sys_get_last_frame_length());
+		robots_act(TCOD_sys_get_last_frame_length());
 
 		for (i = 0; i < MAP_COLS; ++i)
 			for (j = 0; j < MAP_ROWS; ++j)

@@ -1,4 +1,4 @@
-#include "dwarf.h"
+#include "robot.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -7,34 +7,34 @@
 #include "map.h"
 #include "building.h"
 
-dwarf* dwarves;
+robot* robots;
 
-void dwarves_init()
+void robots_init()
 {
-	dwarves = NULL;
+	robots = NULL;
 }
 
-void dwarf_add(dwarf *d)
+void robot_add(robot *d)
 {
-	if (dwarves == NULL) {
-		dwarves = d;
+	if (robots == NULL) {
+		robots = d;
 		d->next = NULL;
 		return;
 	}
 
-	d->next = dwarves;
-	dwarves = d;
+	d->next = robots;
+	robots = d;
 }
 
-dwarf *idleptr;
-void dwarf_reset_idle()
+robot *idleptr;
+void robot_reset_idle()
 {
-	idleptr = dwarves;
+	idleptr = robots;
 }
 
-dwarf* dwarf_next_idle()
+robot* robot_next_idle()
 {
-	dwarf *d;
+	robot *d;
 	for (d = idleptr; d != NULL; d = d->next) {
 		idleptr = idleptr->next;
 		if (d->curr_task == NULL)
@@ -43,23 +43,23 @@ dwarf* dwarf_next_idle()
 	return NULL;
 }
 
-void dwarves_act(float frameduration)
+void robots_act(float frameduration)
 {
-	dwarf *d;
-	for (d = dwarves; d != NULL; d = d->next)
-		dwarf_act(d, frameduration);
+	robot *d;
+	for (d = robots; d != NULL; d = d->next)
+		robot_act(d, frameduration);
 }
 
-void dwarf_act(dwarf *d, float frameduration)
+void robot_act(robot *d, float frameduration)
 {
-	// make sure dwarf has a task
+	// make sure robot has a task
 	if (d->curr_task == NULL)
 		return;
 	if (d->curr_task->act(d, frameduration) == 0)
 		d->curr_task = NULL;
 }
 
-int dwarf_pickup(dwarf *d)
+int robot_pickup(robot *d)
 {
 	int item = map_pickup_item(&d->p);
 	if (item == ITEM_NONE)
@@ -68,7 +68,7 @@ int dwarf_pickup(dwarf *d)
 	return 1;
 }
 
-int dwarf_drop_item(dwarf *d)
+int robot_drop_item(robot *d)
 {
 	if (d->carrying == ITEM_NONE)
 		return 0;
@@ -77,7 +77,7 @@ int dwarf_drop_item(dwarf *d)
 	return 1;
 }
 
-int dwarf_consume(dwarf *d)
+int robot_consume(robot *d)
 {
 	if (d->carrying == ITEM_NONE)
 		return 0;

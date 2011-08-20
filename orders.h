@@ -11,6 +11,6 @@ typedef struct _order {
 void orders_init();
 void order_add(task* t);
 order* orders_list();
-task* order_next(dwarf *d);
+task* order_next(robot *d);
 
 #endif

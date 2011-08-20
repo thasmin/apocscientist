@@ -2,14 +2,14 @@
 #define TASK_H
 
 #include "point.h"
-#include "dwarf.h"
+#include "robot.h"
 
 #define RESEARCH_ROBOT_GATHERER	0
 #define RESEARCH_COUNT		1
 
 typedef struct _task {
 	const char *desc;
-	int (*act)(dwarf*, float);
+	int (*act)(robot*, float);
 	int stage;
 	void* localdata;
 } task;

@@ -26,7 +26,7 @@ order* orders_list()
 	return pending;
 }
 
-task* order_next(dwarf *d)
+task* order_next(robot *d)
 {
 	if (pending == NULL)
 		return NULL;
