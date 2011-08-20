@@ -9,8 +9,6 @@
 #include "map.h"
 #include "building.h"
 
-extern robot guy;
-
 menu_state state;
 
 void menu_init()
@@ -44,8 +42,8 @@ void menu_draw()
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "q - quit");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "The genius is...");
-		if (guy.curr_task != NULL)
-			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, guy.curr_task->desc);
+		if (robot_genius()->curr_task != NULL)
+			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, robot_genius()->curr_task->desc);
 		else
 			TCOD_console_print_left(NULL, 3, linenum++, TCOD_BKGND_NONE, "doing nothing");
 

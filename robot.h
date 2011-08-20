@@ -20,6 +20,8 @@ void robots_init();
 void robot_add(robot *d);
 void robot_reset_idle();
 robot* robot_next_idle();
+robot* robot_genius();
+
 void robots_act(float frameduration);
 
 int robot_pickup(robot *d);

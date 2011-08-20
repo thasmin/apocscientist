@@ -21,9 +21,6 @@
 int symbols[ITEM_COUNT];
 building *temp_building;
 
-// guy starts at 40,10 and has 12 speed
-robot guy = { { 40, 10 }, 12 };
-
 void setup_map()
 {
 	symbols[ITEM_BUCKET] = CHAR_BUCKET;
@@ -80,21 +77,21 @@ int task_pour_bucket_act(robot *d, float frameduration)
 	// stage 3 is pour bucket
 	switch (t->stage) {
 		case 0:
-			point_moveto(&guy.p, &data->bucket, d->speed * frameduration);
-			if (point_equals(&guy.p, &data->bucket))
+			point_moveto(&robot_genius()->p, &data->bucket, d->speed * frameduration);
+			if (point_equals(&robot_genius()->p, &data->bucket))
 				t->stage++;
 			return 1;
 		case 1:
-			robot_pickup(&guy);
+			robot_pickup(robot_genius());
 			t->stage++;
 			return 1;
 		case 2:
-			point_moveto(&guy.p, &data->well, d->speed * frameduration);
-			if (point_equals(&guy.p, &data->well))
+			point_moveto(&robot_genius()->p, &data->well, d->speed * frameduration);
+			if (point_equals(&robot_genius()->p, &data->well))
 				t->stage++;
 			return 1;
 		case 3:
-			robot_consume(&guy);
+			robot_consume(robot_genius());
 			return 0;
 	}
 	return 0;
@@ -102,11 +99,11 @@ int task_pour_bucket_act(robot *d, float frameduration)
 
 void setup_orders()
 {
-	// set up guy to pour buckets on repeat
-	point* bucket = map_find_closest(&guy.p, ITEM_BUCKET);
+	// set up genius to pour buckets on repeat
+	point* bucket = map_find_closest(&robot_genius()->p, ITEM_BUCKET);
 	if (bucket == NULL)
 		return;
-	point* well = map_find_closest(&guy.p, ITEM_WELL);
+	point* well = map_find_closest(&robot_genius()->p, ITEM_WELL);
 	if (well == NULL)
 		return;
 
@@ -136,7 +133,6 @@ int main(int argc, char* argv[])
 	//srand(time(NULL));
 	setup_map();
 	setup_orders();
-	robot_add(&guy);
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
@@ -160,7 +156,7 @@ int main(int argc, char* argv[])
 			for (j = 0; j < MAP_ROWS; ++j)
 				if (map_item_at(i,j) != ITEM_NONE)
 					TCOD_console_set_char(NULL, i, j, symbols[map_item_at(i, j)]);
-		TCOD_console_set_char(NULL, (int)guy.p.x, (int)guy.p.y, CHAR_GUY);
+		TCOD_console_set_char(NULL, (int)robot_genius()->p.x, (int)robot_genius()->p.y, CHAR_GUY);
 
 		buildings_draw();
 		if (temp_building != NULL)

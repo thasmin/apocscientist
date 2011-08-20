@@ -8,22 +8,24 @@
 #include "building.h"
 
 robot* robots;
+robot genius = { { 40, 10 }, 12 };
 
 void robots_init()
 {
-	robots = NULL;
+	robots = &genius;
 }
 
 void robot_add(robot *d)
 {
-	if (robots == NULL) {
-		robots = d;
+	// genius is first
+	if (robots->next == NULL) {
+		robots->next = d;
 		d->next = NULL;
 		return;
 	}
 
-	d->next = robots;
-	robots = d;
+	d->next = robots->next;
+	robots->next = d;
 }
 
 robot *idleptr;
@@ -41,6 +43,11 @@ robot* robot_next_idle()
 			return d;
 	}
 	return NULL;
+}
+
+robot* robot_genius()
+{
+	return robots;
 }
 
 void robots_act(float frameduration)
