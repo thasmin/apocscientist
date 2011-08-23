@@ -8,11 +8,28 @@
 #include "building.h"
 
 robot* robots;
-robot genius = { { 40, 10 }, 12 };
+robot genius;
+
+robot_model robot_models[] = {
+	{ ROBOT_GENIUS, 12, 2, },
+	{ ROBOT_GATHERER, 10, 237, },
+};
 
 void robots_init()
 {
+	genius.model = robot_models[ROBOT_GENIUS];
+	genius.p.x = 40;
+	genius.p.y = 10;
 	robots = &genius;
+}
+
+void robot_create(int model, int x, int y)
+{
+	robot *r = malloc(sizeof(robot));
+	r->model = robot_models[model];
+	r->p.x = x;
+	r->p.y = y;
+	robot_add(r);
 }
 
 void robot_add(robot *d)

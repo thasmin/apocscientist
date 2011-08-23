@@ -6,10 +6,16 @@
 
 int research[RESEARCH_COUNT];
 
+int ingredients_robot_gatherer[ITEM_COUNT] = { 0, 0, 0, 2 };
+// array of integer pointers called ingredients
+int *ingredients[BUILDABLE_COUNT];
+
 void research_init()
 {
 	for (int i = 0; i < RESEARCH_COUNT; ++i)
 		research[i] = 0;
+
+	ingredients[BUILDABLE_ROBOT_GATHERER] = ingredients_robot_gatherer;
 }
 
 int research_is_completed(int research_id)
@@ -52,7 +58,7 @@ int task_search_act(robot *d, float frameduration)
 	}
 	switch (t->stage) {
 		case 1:
-			point_moveto(&d->p, &data->item_p, d->speed * frameduration);
+			point_moveto(&d->p, &data->item_p, d->model.speed * frameduration);
 			if (point_equals(&d->p, &data->item_p))
 				t->stage++;
 			return 1;
@@ -66,7 +72,7 @@ int task_search_act(robot *d, float frameduration)
 			t->stage++;
 			return 1;
 		case 3:
-			point_moveto(&d->p, &data->storage_p, d->speed * frameduration);
+			point_moveto(&d->p, &data->storage_p, d->model.speed * frameduration);
 			if (point_equals(&d->p, &data->storage_p))
 				t->stage++;
 			return 1;
@@ -95,12 +101,12 @@ typedef struct {
 	point where;
 	int model;
 	float delay;
-} task_build_data;
+} task_construct_data;
 
-int task_build_act(robot *d, float frameduration)
+int task_construct_act(robot *d, float frameduration)
 {
 	task *t = d->curr_task;
-	task_build_data* data = (task_build_data*)t->localdata;
+	task_construct_data* data = (task_construct_data*)t->localdata;
 
 	// stage 0 is move
 	// stage 1 is delay
@@ -112,7 +118,7 @@ int task_build_act(robot *d, float frameduration)
 	};
 	switch (t->stage) {
 		case 0:
-			point_moveto(&d->p, &center, d->speed * frameduration);
+			point_moveto(&d->p, &center, d->model.speed * frameduration);
 			if (point_equals(&d->p, &center))
 				t->stage++;
 			return 1;
@@ -128,14 +134,14 @@ int task_build_act(robot *d, float frameduration)
 	return 0;
 }
 
-task* task_build_create(int model_id, int x, int y)
+task* task_construct_create(int model_id, int x, int y)
 {
 	task *t = malloc(sizeof(task));
 	t->desc = "Build a building";
-	t->act = task_build_act;
+	t->act = task_construct_act;
 	t->stage = 0;
-	t->localdata = malloc(sizeof(task_build_data));
-	task_build_data *data = (task_build_data*)t->localdata;
+	t->localdata = malloc(sizeof(task_construct_data));
+	task_construct_data *data = (task_construct_data*)t->localdata;
 	data->where.x = x;
 	data->where.y = y;
 	data->model = model_id;
@@ -168,7 +174,7 @@ int task_research_act(robot *d, float frameduration)
 	switch (t->stage)
 	{
 		case 1:
-			point_moveto(&d->p, &data->lab_p, d->speed * frameduration);
+			point_moveto(&d->p, &data->lab_p, d->model.speed * frameduration);
 			if (point_equals(&d->p, &data->lab_p))
 				t->stage++;
 			return 1;
@@ -187,12 +193,111 @@ int task_research_act(robot *d, float frameduration)
 task* task_research_create(int research)
 {
 	task *t = malloc(sizeof(task));
-	t->desc = "research";
+	t->desc = "Research";
 	t->act = task_research_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_research_data));
 	task_research_data *data = (task_research_data*)t->localdata;
 	data->research = research;
 	data->research_time = 3;
+	return t;
+}
+
+typedef struct {
+	int buildable;
+	int ingredients_remaining[ITEM_COUNT];
+	int ingredient_to_take;
+	point ingredient_p;
+	point workshop_p;
+	int build_time;
+} task_build_data;
+
+int task_build_act(robot *d, float frameduration)
+{
+	task *t = d->curr_task;
+	task_build_data* data = (task_build_data*)t->localdata;
+
+	// stage 0 is create ingredient list
+	// stage 1 is see if all ingredients are present and if so, go to step 6
+	// stage 2 is move to storage
+	// stage 3 is remove ingredient from storage
+	// stage 4 is move to workshop
+	// stage 5 is drop ingredient and go to stage 1
+	// stage 6 is delay while building
+	// stage 7 is create item
+	// stage 8 is specific to item?
+	if (t->stage == 0) {
+		memcpy(data->ingredients_remaining, ingredients[data->buildable], sizeof(int) * ITEM_COUNT);
+		t->stage++;
+	}
+	if (t->stage == 1) {
+		for (int i = 0; i < ITEM_COUNT; ++i)
+			if (data->ingredients_remaining[i] > 0) {
+				data->ingredient_to_take = i;
+				building *storage = building_find_closest(&d->p, BUILDING_STORAGE);
+				memcpy(&data->ingredient_p, &storage->p, sizeof(point));
+				building_adjust_to_center(storage, &data->ingredient_p);
+				t->stage = 2;
+				return 1;
+			}
+
+		// no more ingredients to fetch
+		t->stage = 6;
+		return 1;
+	}
+	if (t->stage == 2) {
+		point_moveto(&d->p, &data->ingredient_p, d->model.speed * frameduration);
+		if (point_equals(&d->p, &data->ingredient_p))
+			t->stage++;
+		return 1;
+	}
+	if (t->stage == 3) {
+		storage_take(data->ingredient_to_take);
+		// if no warehouse has been picked, find the closest
+		if (!point_is_valid(&data->workshop_p)) {
+			building *workshop = building_find_closest(&d->p, BUILDING_WORKSHOP);
+			memcpy(&data->workshop_p, &workshop->p, sizeof(point));
+			building_adjust_to_center(workshop, &data->workshop_p);
+		}
+		t->stage++;
+		return 1;
+	}
+	if (t->stage == 4) {
+		point_moveto(&d->p, &data->workshop_p, d->model.speed * frameduration);
+		if (point_equals(&d->p, &data->workshop_p))
+			t->stage++;
+		return 1;
+	}
+	if (t->stage == 5) {
+		data->ingredients_remaining[data->ingredient_to_take] -= 1;
+		// check ingredient list again
+		t->stage = 1;
+		return 1;
+	}
+	if (t->stage == 6) {
+		data->build_time -= frameduration;
+		if (data->build_time <= 0)
+			t->stage++;
+		return 1;
+	}
+	if (t->stage == 7) {
+		robot_create(ROBOT_GATHERER, data->workshop_p.x + 1, data->workshop_p.y + 1);
+		return 0;
+	}
+
+	return 0;
+}
+
+task* task_build_create(int buildable)
+{
+	task *t = malloc(sizeof(task));
+	t->desc = "Build in the workshop";
+	t->act = task_build_act;
+	t->stage = 0;
+	t->localdata = malloc(sizeof(task_build_data));
+	task_build_data *data = (task_build_data*)t->localdata;
+	data->buildable = buildable;
+	point_invalidate(&data->workshop_p);
+	data->build_time = 3;
 	return t;
 }

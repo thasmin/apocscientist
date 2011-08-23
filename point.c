@@ -7,6 +7,16 @@
 #define PI 3.14159265
 #endif
 
+void point_invalidate(point *p)
+{
+	p->x = p->y = -1;
+}
+
+int point_is_valid(point *p)
+{
+	return p->x != -1 && p->y != -1;
+}
+
 // actually dist^2
 float point_dist(point *p1, point *p2)
 {

@@ -6,12 +6,6 @@
 #define MAP_COLS	80
 #define MAP_ROWS	50
 
-#define ITEM_NONE 	0
-#define ITEM_BUCKET 	1
-#define ITEM_WELL	2
-#define ITEM_SCREW	3
-#define ITEM_COUNT	4
-
 void map_init();
 
 int mapindex(int x, int y);
@@ -21,6 +15,7 @@ int map_item_at(int x, int y);
 point_node *map_item_list(int item);
 
 void storage_add(int item);
+int storage_take(int item);
 unsigned storage_get_count(int item);
 
 point* map_find_closest(point *p, int item);

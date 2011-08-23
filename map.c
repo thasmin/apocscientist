@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "map.h"
+#include "task.h"
 
 point_node *items[ITEM_COUNT];
 int map[MAP_COLS * MAP_ROWS];
@@ -102,6 +103,14 @@ point* map_find_closest(point *p, int item)
 void storage_add(int item)
 {
 	++storage[item];
+}
+
+int storage_take(int item)
+{
+	if (storage[item] <= 0)
+		return 0;
+	storage[item]--;
+	return 1;
 }
 
 unsigned storage_get_count(int item)

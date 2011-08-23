@@ -17,6 +17,7 @@
 #define CHAR_WELL 	9
 #define CHAR_GUY 	2
 #define CHAR_SCREW 	21
+#define CHAR_GATHERER	239
 
 int symbols[ITEM_COUNT];
 building *temp_building;
@@ -77,7 +78,7 @@ int task_pour_bucket_act(robot *d, float frameduration)
 	// stage 3 is pour bucket
 	switch (t->stage) {
 		case 0:
-			point_moveto(&robot_genius()->p, &data->bucket, d->speed * frameduration);
+			point_moveto(&robot_genius()->p, &data->bucket, d->model.speed * frameduration);
 			if (point_equals(&robot_genius()->p, &data->bucket))
 				t->stage++;
 			return 1;
@@ -86,7 +87,7 @@ int task_pour_bucket_act(robot *d, float frameduration)
 			t->stage++;
 			return 1;
 		case 2:
-			point_moveto(&robot_genius()->p, &data->well, d->speed * frameduration);
+			point_moveto(&robot_genius()->p, &data->well, d->model.speed * frameduration);
 			if (point_equals(&robot_genius()->p, &data->well))
 				t->stage++;
 			return 1;
@@ -152,11 +153,15 @@ int main(int argc, char* argv[])
 
 		robots_act(TCOD_sys_get_last_frame_length());
 
+		// draw map
 		for (i = 0; i < MAP_COLS; ++i)
 			for (j = 0; j < MAP_ROWS; ++j)
 				if (map_item_at(i,j) != ITEM_NONE)
 					TCOD_console_set_char(NULL, i, j, symbols[map_item_at(i, j)]);
-		TCOD_console_set_char(NULL, (int)robot_genius()->p.x, (int)robot_genius()->p.y, CHAR_GUY);
+
+		// draw robots
+		for (d = robot_genius(); d != NULL; d = d->next)
+			TCOD_console_set_char(NULL, d->p.x, d->p.y, d->model.mapchar);
 
 		buildings_draw();
 		if (temp_building != NULL)
@@ -202,8 +207,11 @@ int main(int argc, char* argv[])
 				} else if (key.c == 'g' || key.c == 'G') {
 					menu_set_state(MENU_NONE);
 					if (research_is_completed(RESEARCH_ROBOT_GATHERER) &&
-						building_model_exists(BUILDING_WORKSHOP)) {
-						// TODO: build a gatherer robot
+						building_model_exists(BUILDING_WORKSHOP) &&
+						storage_get_count(ITEM_SCREW) >= 2) {
+						order_add(
+							task_build_create(BUILDABLE_ROBOT_GATHERER)
+						);
 					}
 				}
 			} else if (menu_get_state() == MENU_MOVEBUILDING) {
@@ -212,7 +220,7 @@ int main(int argc, char* argv[])
 					temp_building = NULL;
 					menu_set_state(MENU_NONE);
 				} else if (key.vk == TCODK_ENTER) {
-					order_add(task_build_create(
+					order_add(task_construct_create(
 						temp_building->model->model,
 						temp_building->p.x,
 						temp_building->p.y));

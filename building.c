@@ -6,7 +6,7 @@
 
 building* buildings;
 
-building_model models[] = {
+building_model building_models[] = {
 	{ BUILDING_LABORATORY, 5, 5, "Lab" },
 	{ BUILDING_WORKSHOP,   5, 5, "Wrk" },
 	{ BUILDING_STORAGE,    7, 7, "Stg" },
@@ -14,9 +14,9 @@ building_model models[] = {
 
 void buildings_init()
 {
-	models[BUILDING_LABORATORY].color = TCOD_yellow;
-	models[BUILDING_WORKSHOP].color = TCOD_green;
-	models[BUILDING_STORAGE].color = TCOD_blue;
+	building_models[BUILDING_LABORATORY].color = TCOD_yellow;
+	building_models[BUILDING_WORKSHOP].color = TCOD_green;
+	building_models[BUILDING_STORAGE].color = TCOD_blue;
 	buildings = NULL;
 }
 
@@ -32,13 +32,13 @@ void buildings_destroy()
 
 building_model* building_get_model(int model)
 {
-	return &models[model];
+	return &building_models[model];
 }
 
 building* building_create(int model, point *p)
 {
 	building *b = malloc(sizeof(building));
-	b->model = &models[model];
+	b->model = &building_models[model];
 	memcpy(&b->p, p, sizeof(point));
 	b->next = buildings;
 	return b;
