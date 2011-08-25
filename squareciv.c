@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <math.h>
 #include <time.h>
+#include <getopt.h>
 #include <tcod/libtcod.h>
 
 #include "point.h"
@@ -27,14 +28,6 @@ void setup_map()
 	symbols[ITEM_BUCKET] = CHAR_BUCKET;
 	symbols[ITEM_WELL] = CHAR_WELL;
 	symbols[ITEM_SCREW] = CHAR_SCREW;
-
-	// frame is 0, 0 to 30, 50
-
-	map_create_item(45, 20, ITEM_BUCKET);
-	map_create_item(50, 40, ITEM_BUCKET);
-	map_create_item(70, 20, ITEM_BUCKET);
-
-	map_create_item(60, 25, ITEM_WELL);
 
 	// house is 50,15 to 70,35
 	// make 5 screws outside house
@@ -98,8 +91,14 @@ int task_pour_bucket_act(robot *d, float frameduration)
 	return 0;
 }
 
-void setup_orders()
+void setup_scenario_zero()
 {
+	// frame is 0, 0 to 30, 50
+	map_create_item(45, 20, ITEM_BUCKET);
+	map_create_item(50, 40, ITEM_BUCKET);
+	map_create_item(70, 20, ITEM_BUCKET);
+	map_create_item(60, 25, ITEM_WELL);
+
 	// set up genius to pour buckets on repeat
 	point* bucket = map_find_closest(&robot_genius()->p, ITEM_BUCKET);
 	if (bucket == NULL)
@@ -122,8 +121,7 @@ void setup_orders()
 
 int main(int argc, char* argv[])
 {
-	int i, j;
-
+	// initialize data structures
 	research_init();
 	map_init();
 	robots_init();
@@ -131,9 +129,32 @@ int main(int argc, char* argv[])
 	orders_init();
 	temp_building = NULL;
 
+	// global options
+	int debug = 0;
+       	int scenario = 0;
+	struct option options[] = {
+		{ "debug", no_argument, 0, 'd' },
+		{ "scenario", required_argument, 0, 's' },
+		{ 0, 0, 0, 0},
+	};
+	int c, option_index = 0;
+	while ((c = getopt_long(argc, argv, "ds:", options, &option_index)) != -1) {
+		switch (c) {
+			case 0:
+				break;
+			case 'd':
+				debug = 1;
+				break;
+			case 's':
+				scenario = atoi(optarg);
+				break;
+		}
+	}
+
 	//srand(time(NULL));
 	setup_map();
-	setup_orders();
+	if (debug && scenario == 0)
+		setup_scenario_zero();
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
@@ -154,8 +175,8 @@ int main(int argc, char* argv[])
 		robots_act(TCOD_sys_get_last_frame_length());
 
 		// draw map
-		for (i = 0; i < MAP_COLS; ++i)
-			for (j = 0; j < MAP_ROWS; ++j)
+		for (int i = 0; i < MAP_COLS; ++i)
+			for (int j = 0; j < MAP_ROWS; ++j)
 				if (map_item_at(i,j) != ITEM_NONE)
 					TCOD_console_set_char(NULL, i, j, symbols[map_item_at(i, j)]);
 
