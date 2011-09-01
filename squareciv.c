@@ -119,6 +119,20 @@ void setup_scenario_zero()
 	order_add(t);
 }
 
+void setup_secnario_one()
+{
+	point lab = { 50, 20 };
+	building_add(BUILDING_LABORATORY, &lab);
+	point workshop = { 44, 20 };
+	building_add(BUILDING_WORKSHOP, &workshop);
+	point storage = { 50, 26 };
+	building_add(BUILDING_STORAGE, &storage);
+
+	robot_genius()->p.x = 46;
+	robot_genius()->p.y = 22;
+	robot_create(ROBOT_GATHERER, 47, 22);
+}
+
 int main(int argc, char* argv[])
 {
 	// initialize data structures
@@ -155,6 +169,8 @@ int main(int argc, char* argv[])
 	setup_map();
 	if (debug && scenario == 0)
 		setup_scenario_zero();
+	else if (debug && scenario == 1)
+		setup_secnario_one();
 
 	TCOD_key_t key = {TCODK_NONE,0};
 

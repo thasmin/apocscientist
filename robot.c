@@ -29,6 +29,8 @@ void robot_create(int model, int x, int y)
 	r->model = robot_models[model];
 	r->p.x = x;
 	r->p.y = y;
+	r->carrying = ITEM_NONE;
+	r->curr_task = NULL;
 	robot_add(r);
 }
 
