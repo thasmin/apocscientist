@@ -119,7 +119,7 @@ void setup_scenario_zero()
 	order_add(t);
 }
 
-void setup_secnario_one()
+void setup_scenario_one()
 {
 	point lab = { 50, 20 };
 	building_add(BUILDING_LABORATORY, &lab);
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 	if (debug && scenario == 0)
 		setup_scenario_zero();
 	else if (debug && scenario == 1)
-		setup_secnario_one();
+		setup_scenario_one();
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
