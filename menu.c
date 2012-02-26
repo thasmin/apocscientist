@@ -38,7 +38,7 @@ void menu_draw()
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "b - build");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - search");
 		if (building_model_exists(BUILDING_LABORATORY))
-			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "s - research");
+			TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "r - research");
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "q - quit");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print_left(NULL, 1, linenum++, TCOD_BKGND_NONE, "The genius is...");
