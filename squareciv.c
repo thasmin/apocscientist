@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#ifdef MACOSX
+#include <sys/malloc.h>
+#else
 #include <malloc.h>
+#endif
 #include <math.h>
 #include <time.h>
 #include <getopt.h>
@@ -174,10 +178,10 @@ int main(int argc, char* argv[])
 
 	TCOD_key_t key = {TCODK_NONE,0};
 
-	TCOD_console_init_root(MAP_COLS, MAP_ROWS, "Square Civilization", false);
+	TCOD_console_init_root(MAP_COLS, MAP_ROWS, "Square Civilization", false, TCOD_RENDERER_GLSL);
 	TCOD_sys_set_fps(30);
-	TCOD_console_set_background_color(NULL, TCOD_black);
-	TCOD_console_set_foreground_color(NULL, TCOD_light_gray);
+	TCOD_console_set_default_background(NULL, TCOD_black);
+	TCOD_console_set_default_foreground(NULL, TCOD_light_gray);
 
 	do {
 		TCOD_console_clear(NULL);
