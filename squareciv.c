@@ -31,7 +31,7 @@ void setup_map()
 
 	// house is 50,15 to 70,35
 	// make 5 screws outside house
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 2; ++i) {
 		int x, y;
 		do {
 			x = rand() % 49 + 31;
@@ -185,8 +185,12 @@ int main(int argc, char* argv[])
 		// give orders to idle robots
 		robot *d;
 		robot_reset_idle();
-		for (d = robot_next_idle(); d != NULL; d = robot_next_idle())
+		for (d = robot_next_idle(); d != NULL; d = robot_next_idle()) {
 			d->curr_task = order_next(d);
+			if (d->curr_task == NULL) {
+				d->curr_task = task_clone(d->model.idle_task);
+			}
+		}
 
 		robots_act(TCOD_sys_get_last_frame_length());
 

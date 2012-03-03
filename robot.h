@@ -10,8 +10,10 @@ struct _task;
 
 typedef struct _robot_model {
 	int robot_id;
+	char* name;
 	int speed;
 	int mapchar;
+	struct _task *idle_task;
 } robot_model;
 
 typedef struct _robot {
@@ -37,5 +39,7 @@ int robot_consume(robot *d);
 void robot_act(robot *d, float frameduration);
 
 int robot_search(robot *d, int item);
+
+int robot_gatherer_idle(robot *d);
 
 #endif

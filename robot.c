@@ -11,8 +11,8 @@ robot* robots;
 robot genius;
 
 robot_model robot_models[] = {
-	{ ROBOT_GENIUS, 12, 2, },
-	{ ROBOT_GATHERER, 10, 237, },
+	{ ROBOT_GENIUS, "Genius", 12, 2, },
+	{ ROBOT_GATHERER, "Gatherer", 6, 237, },
 };
 
 void robots_init()
@@ -21,6 +21,8 @@ void robots_init()
 	genius.p.x = 40;
 	genius.p.y = 10;
 	robots = &genius;
+
+	robot_models[ROBOT_GATHERER].idle_task = task_search_create(ITEM_SCREW);
 }
 
 void robot_create(int model, int x, int y)

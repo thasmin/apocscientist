@@ -21,8 +21,10 @@ typedef struct _task {
 	int (*act)(robot*, float);
 	int stage;
 	void* localdata;
+	int localdata_size;
 } task;
 
+task* task_clone(task *t);
 int task_destroy(task *t);
 
 task* task_search_create(int item);

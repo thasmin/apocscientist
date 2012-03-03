@@ -23,6 +23,17 @@ int research_is_completed(int research_id)
 	return research[research_id];
 }
 
+task* task_clone(task *t)
+{
+	if (t == NULL)
+		return NULL;
+	task* n = malloc(sizeof(*t));
+	memcpy(n, t, sizeof(*t));
+	n->localdata = malloc(t->localdata_size);
+	memcpy(n->localdata, t->localdata, t->localdata_size);
+	return n;
+}
+
 int task_destroy(task *t)
 {
 	if (t == NULL)
@@ -92,6 +103,7 @@ task* task_search_create(int item)
 	t->act = task_search_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_search_data));
+	t->localdata_size = sizeof(task_search_data);
 	task_search_data *data = (task_search_data*)t->localdata;
 	data->item = item;
 	return t;
@@ -141,6 +153,7 @@ task* task_construct_create(int model_id, int x, int y)
 	t->act = task_construct_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_construct_data));
+	t->localdata_size = sizeof(task_construct_data);
 	task_construct_data *data = (task_construct_data*)t->localdata;
 	data->where.x = x;
 	data->where.y = y;
@@ -197,6 +210,7 @@ task* task_research_create(int research)
 	t->act = task_research_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_research_data));
+	t->localdata_size = sizeof(task_research_data);
 	task_research_data *data = (task_research_data*)t->localdata;
 	data->research = research;
 	data->research_time = 3;
@@ -295,6 +309,7 @@ task* task_build_create(int buildable)
 	t->act = task_build_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_build_data));
+	t->localdata_size = sizeof(task_build_data);
 	task_build_data *data = (task_build_data*)t->localdata;
 	data->buildable = buildable;
 	point_invalidate(&data->workshop_p);
