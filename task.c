@@ -63,6 +63,8 @@ int task_search_act(robot *d, float frameduration)
 	if (t->stage == 0)
 	{
 		point *where = map_find_closest(&d->p, data->item);
+		if (where == NULL)
+			return 0;
 		memcpy(&data->item_p, where, sizeof(point));
 		robot_drop_item(d);
 		t->stage++;
