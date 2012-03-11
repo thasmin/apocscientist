@@ -45,20 +45,6 @@ void setup_map()
 	}
 }
 
-void destroy_map()
-{
-	int i;
-	for (i = 0; i < ITEM_COUNT; ++i)
-	{
-		point_node *node = map_item_list(i);
-		while (node != NULL) {
-			point_node *next = node->next;
-			free(node);
-			node = next;
-		}
-	}
-}
-
 typedef struct {
 	point bucket;
 	point well;
@@ -291,7 +277,7 @@ int main(int argc, char* argv[])
 		}
 	} while (!TCOD_console_is_window_closed());
 
-	destroy_map();
+	map_destroy();
 
 	return 0;
 }

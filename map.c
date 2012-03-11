@@ -8,10 +8,30 @@ point_node *items[ITEM_COUNT];
 int map[MAP_COLS * MAP_ROWS];
 unsigned storage[ITEM_COUNT];
 
+TCOD_map_t tcod_map;
+
 void map_init()
 {
 	memset(items, 0, sizeof(point_node*) * ITEM_COUNT);
 	memset(storage, 0, sizeof(unsigned) * ITEM_COUNT);
+	tcod_map = TCOD_map_new(MAP_COLS, MAP_ROWS);
+	TCOD_map_clear(tcod_map, true, true);
+	printf("new map - %d x %d\n", MAP_COLS, MAP_ROWS);
+}
+
+void map_destroy()
+{
+	for (int i = 0; i < ITEM_COUNT; ++i)
+	{
+		point_node *node = items[i];
+		while (node != NULL) {
+			point_node *next = node->next;
+			free(node);
+			node = next;
+		}
+	}
+
+	TCOD_map_delete(tcod_map);
 }
 
 inline int mapindex(int x, int y)
@@ -78,6 +98,42 @@ int map_drop_item(point *p, int item)
 	if (item == ITEM_NONE)
 		return 0;
 	return map_create_item(p->x, p->y, item);
+}
+
+inline void map_set_walkable(int x, int y, bool is_walkable)
+{
+	TCOD_map_set_properties(tcod_map, x, y, true, is_walkable);
+}
+
+TCOD_path_t map_computepath(point *origin, point *dest)
+{
+	//printf("origin %f, %f\n", origin->x, origin->y);
+	//printf("dest %f, %f\n", dest->x, dest->y);
+	// diagonal cost is sqrt(2)
+	TCOD_path_t path = TCOD_path_new_using_map(tcod_map, 1.41f);
+	TCOD_path_compute(path, origin->x, origin->y, dest->x, dest->y);
+
+	/*
+	bool is_possible = TCOD_path_compute(path, origin->x, origin->y, dest->x, dest->y);
+	printf("is_possible: %d\n", is_possible);
+	printf("path steps: %d\n", TCOD_path_size(path));
+	for (int i = 0; i < TCOD_path_size(path); ++i) {
+		int x, y;
+		TCOD_path_get(path, i, &x, &y);
+		printf("step %d: %d, %d\n", i + 1, x, y);
+	}
+	*/
+	return path;
+}
+
+void map_walk(TCOD_path_t path, point *p, float dist)
+{
+	//printf("from %f, %f\n", p->x, p->y);
+	int x, y;
+	TCOD_path_walk(path, &x, &y, true);
+	p->x = x;
+	p->y = y;
+	//printf("to %d, %d\n", x, y);
 }
 
 point* map_find_closest(point *p, int item)

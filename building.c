@@ -53,6 +53,18 @@ void building_add(int model, point *p)
 	building *b = building_create(model, p);
 	b->next = buildings;
 	buildings = b;
+
+	// make the building not walkable
+	for (int i = b->p.x; i < b->p.x + b->model->width; ++i) {
+		map_set_walkable(i, b->p.y, false);
+		map_set_walkable(i, b->p.y + b->p.y + b->model->height, false);
+	}
+	for (int i = b->p.y; i < b->p.y + b->model->height; ++i) {
+		map_set_walkable(b->p.x, i, false);
+		map_set_walkable(b->p.x + b->p.x + b->model->width, i, false);
+	}
+	map_set_walkable(b->p.x + b->model->width / 2,
+					 b->p.y + b->model->height, true);
 }
 
 void building_draw(building *b)

@@ -48,6 +48,7 @@ typedef struct {
 	point item_p;
 	building* storage;
 	point storage_p;
+	TCOD_path_t path;
 } task_search_data;
 
 int task_search_act(robot *d, float frameduration)
@@ -66,12 +67,14 @@ int task_search_act(robot *d, float frameduration)
 		if (where == NULL)
 			return 0;
 		memcpy(&data->item_p, where, sizeof(point));
+		data->path = map_computepath(&d->p, &data->item_p);
 		robot_drop_item(d);
 		t->stage++;
 	}
 	switch (t->stage) {
 		case 1:
-			point_moveto(&d->p, &data->item_p, d->model.speed * frameduration);
+			map_walk(data->path, &d->p, d->model.speed * frameduration);
+			//point_moveto(&d->p, &data->item_p, d->model.speed * frameduration);
 			if (point_equals(&d->p, &data->item_p))
 				t->stage++;
 			return 1;
@@ -82,10 +85,12 @@ int task_search_act(robot *d, float frameduration)
 				return 0;
 			memcpy(&data->storage_p, &data->storage->p, sizeof(point));
 			building_adjust_to_center(data->storage, &data->storage_p);
+			data->path = map_computepath(&d->p, &data->storage_p);
 			t->stage++;
 			return 1;
 		case 3:
-			point_moveto(&d->p, &data->storage_p, d->model.speed * frameduration);
+			map_walk(data->path, &d->p, d->model.speed * frameduration);
+			//point_moveto(&d->p, &data->storage_p, d->model.speed * frameduration);
 			if (point_equals(&d->p, &data->storage_p))
 				t->stage++;
 			return 1;
