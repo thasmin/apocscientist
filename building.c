@@ -7,6 +7,7 @@
 #include <malloc.h>
 #endif
 #include <limits.h>
+#include <tcod/libtcod.h>
 
 building* buildings;
 
@@ -54,17 +55,24 @@ void building_add(int model, point *p)
 	b->next = buildings;
 	buildings = b;
 
+	printf("building size %d at %f, %f\n", b->model->height, b->p.x, b->p.y);
 	// make the building not walkable
-	for (int i = b->p.x; i < b->p.x + b->model->width; ++i) {
-		map_set_walkable(i, b->p.y, false);
-		map_set_walkable(i, b->p.y + b->p.y + b->model->height, false);
+	for (int i = b->p.x; i <= b->p.x + b->model->width; ++i) {
+		//printf("unwalkable: %d, %d\n", i, (int)b->p.y);
+		map_set_walkable(i, (int)b->p.y, false);
+		//printf("unwalkable: %d, %d\n", i, (int)b->p.y + b->model->height);
+		map_set_walkable(i, (int)b->p.y + b->model->height, false);
 	}
-	for (int i = b->p.y; i < b->p.y + b->model->height; ++i) {
-		map_set_walkable(b->p.x, i, false);
-		map_set_walkable(b->p.x + b->p.x + b->model->width, i, false);
+	for (int i = b->p.y; i <= b->p.y + b->model->height; ++i) {
+		//printf("unwalkable: %d, %d\n", (int)b->p.x, i);
+		map_set_walkable((int)b->p.x, i, false);
+		//printf("unwalkable: %d, %d\n", (int)b->p.x + b->model->width, i);
+		map_set_walkable((int)b->p.x + b->model->width, i, false);
 	}
-	map_set_walkable(b->p.x + b->model->width / 2,
-					 b->p.y + b->model->height, true);
+	//printf("  walkable: %d, %d\n", (int)b->p.x + b->model->width / 2,
+	//								(int)b->p.y + b->model->height);
+	map_set_walkable((int)b->p.x + b->model->width / 2,
+					 (int)b->p.y + b->model->height, true);
 }
 
 void building_draw(building *b)

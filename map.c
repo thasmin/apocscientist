@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "map.h"
 #include "task.h"
@@ -16,7 +17,6 @@ void map_init()
 	memset(storage, 0, sizeof(unsigned) * ITEM_COUNT);
 	tcod_map = TCOD_map_new(MAP_COLS, MAP_ROWS);
 	TCOD_map_clear(tcod_map, true, true);
-	printf("new map - %d x %d\n", MAP_COLS, MAP_ROWS);
 }
 
 void map_destroy()
@@ -100,8 +100,9 @@ int map_drop_item(point *p, int item)
 	return map_create_item(p->x, p->y, item);
 }
 
-inline void map_set_walkable(int x, int y, bool is_walkable)
+void map_set_walkable(int x, int y, bool is_walkable)
 {
+	// fourth argument is is_transparent
 	TCOD_map_set_properties(tcod_map, x, y, true, is_walkable);
 }
 
@@ -128,12 +129,38 @@ TCOD_path_t map_computepath(point *origin, point *dest)
 
 void map_walk(TCOD_path_t path, point *p, float dist)
 {
-	//printf("from %f, %f\n", p->x, p->y);
 	int x, y;
-	TCOD_path_walk(path, &x, &y, true);
-	p->x = x;
-	p->y = y;
-	//printf("to %d, %d\n", x, y);
+	TCOD_path_get_origin(path, &x, &y);
+	//printf("origin: %d, %d\n", x, y);
+	//printf("curr  : %f, %f\n", p->x, p->y);
+	TCOD_path_get(path, 0, &x, &y);
+	//printf("step 0: %d, %d\n", x, y);
+
+	// if the next step is closer than dist, move to it
+	// then subtract how far was moved from dist and repeat
+	float mx = x - p->x;
+	float my = y - p->y;
+	//printf("m     : %f, %f\ndist : %f\n", mx, my, dist);
+	while (mx * mx + my * my < dist * dist) {
+		p->x = x;
+		p->y = y;
+		dist -= sqrt(mx * mx + my * my);
+
+		TCOD_path_walk(path, &x, &y, true);
+		//printf("next step: %d, %d\n", x, y);
+		mx = x - p->x;
+		my = y - p->y;
+		if (mx == 0.0f && my == 0.0f)
+			return;
+		//printf("m     : %f, %f\ndist : %f\n", mx, my, dist);
+	}
+
+	float pctm = dist / sqrt(mx * mx + my * my);
+	p->x += pctm * mx;
+	p->y += pctm * my;
+	//printf("dist  : %f\n", dist);
+	//printf("final : %f, %f\n", p->x, p->y);
+	//printf("\n");
 }
 
 point* map_find_closest(point *p, int item)
