@@ -9,12 +9,15 @@
 #include <limits.h>
 #include <tcod/libtcod.h>
 
+#include "map.h"
+
 building* buildings;
 
 building_model building_models[] = {
 	{ BUILDING_LABORATORY, 5, 5, "Lab" },
 	{ BUILDING_WORKSHOP,   5, 5, "Wrk" },
 	{ BUILDING_STORAGE,    7, 7, "Stg" },
+	{ BUILDING_QUARRY,     5, 5, "Qry" },
 };
 
 void buildings_init()
@@ -22,6 +25,7 @@ void buildings_init()
 	building_models[BUILDING_LABORATORY].color = TCOD_yellow;
 	building_models[BUILDING_WORKSHOP].color = TCOD_green;
 	building_models[BUILDING_STORAGE].color = TCOD_blue;
+	building_models[BUILDING_QUARRY].color = TCOD_silver;
 	buildings = NULL;
 }
 
@@ -55,7 +59,7 @@ void building_add(int model, point *p)
 	b->next = buildings;
 	buildings = b;
 
-	printf("building size %d at %f, %f\n", b->model->height, b->p.x, b->p.y);
+	//printf("building size %d at %f, %f\n", b->model->height, b->p.x, b->p.y);
 	// make the building not walkable
 	for (int i = b->p.x; i <= b->p.x + b->model->width; ++i) {
 		//printf("unwalkable: %d, %d\n", i, (int)b->p.y);

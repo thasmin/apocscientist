@@ -7,6 +7,7 @@
 #define BUILDING_LABORATORY	0
 #define BUILDING_WORKSHOP	1
 #define BUILDING_STORAGE	2
+#define BUILDING_QUARRY     3
 
 typedef struct _building_model {
 	int model;

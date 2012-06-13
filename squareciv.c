@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
 	// global options
 	int debug = 0;
-       	int scenario = 0;
+	int scenario = 0;
 	struct option options[] = {
 		{ "debug", no_argument, 0, 'd' },
 		{ "scenario", required_argument, 0, 's' },
@@ -235,6 +235,10 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_MOVEBUILDING);
 					point p = { 52, 22 };
 					temp_building = building_create(BUILDING_STORAGE, &p);
+				} else if (key.c == 'q' || key.c == 'Q') {
+					menu_set_state(MENU_MOVEBUILDING);
+					point p = { 52, 22 };
+					temp_building = building_create(BUILDING_QUARRY, &p);
 				} else if (key.c == 'g' || key.c == 'G') {
 					menu_set_state(MENU_NONE);
 					if (research_is_completed(RESEARCH_ROBOT_GATHERER) &&

@@ -77,6 +77,7 @@ void menu_draw()
 		TCOD_console_print(NULL, 1, linenum++, "l - laboratory");
 		TCOD_console_print(NULL, 1, linenum++, "w - workshop");
 		TCOD_console_print(NULL, 1, linenum++, "s - storage");
+		TCOD_console_print(NULL, 1, linenum++, "q - quarry");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		if (research_is_completed(RESEARCH_ROBOT_GATHERER) && building_model_exists(BUILDING_WORKSHOP)) {
 			TCOD_console_print(NULL, 1, linenum++, "g - gatherer robot");
