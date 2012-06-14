@@ -20,7 +20,7 @@ void robots_init()
 	robot_create(ROBOT_GENIUS, 44, 13);
 	robot_create(ROBOT_GENIUS, 46, 12);
 
-	robot_models[ROBOT_GATHERER].idle_task = task_search_create(ITEM_SCREW);
+	robot_models[ROBOT_GATHERER].idle_task = task_search_create(ITEM_SCRAP);
 }
 
 void robot_create(int model, int x, int y)

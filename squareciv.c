@@ -21,7 +21,7 @@
 #define CHAR_BUCKET 	207
 #define CHAR_WELL 	9
 #define CHAR_GUY 	2
-#define CHAR_SCREW 	21
+#define CHAR_SCRAP 	21
 #define CHAR_GATHERER	239
 
 int symbols[ITEM_COUNT];
@@ -31,7 +31,7 @@ void setup_map()
 {
 	symbols[ITEM_BUCKET] = CHAR_BUCKET;
 	symbols[ITEM_WELL] = CHAR_WELL;
-	symbols[ITEM_SCREW] = CHAR_SCREW;
+	symbols[ITEM_SCRAP] = CHAR_SCRAP;
 
 	// house is 50,15 to 70,35
 	// make 5 screws outside house
@@ -41,7 +41,7 @@ void setup_map()
 			x = rand() % 49 + 31;
 			y = rand() % 49 +  1;
 		} while (x < 50 || x > 70 || y < 15 || y < 35);
-		map_create_item(x, y, ITEM_SCREW);
+		map_create_item(x, y, ITEM_SCRAP);
 	}
 }
 
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
 				if (key.vk == TCODK_ESCAPE)
 					menu_set_state(MENU_NONE);
 				else if (key.c == 's' || key.c == 'S') {
-					order_add(task_search_create(ITEM_SCREW));
+					order_add(task_search_create(ITEM_SCRAP));
 					menu_set_state(MENU_NONE);
 				}
 			} else if (menu_get_state() == MENU_BUILD) {
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_NONE);
 					if (research_is_completed(RESEARCH_ROBOT_GATHERER) &&
 						building_model_exists(BUILDING_WORKSHOP) &&
-						storage_get_count(ITEM_SCREW) >= 2) {
+						storage_get_count(ITEM_SCRAP) >= 2) {
 						order_add(
 							task_build_create(BUILDABLE_ROBOT_GATHERER)
 						);

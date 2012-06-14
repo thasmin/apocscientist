@@ -62,12 +62,12 @@ void menu_draw()
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		int i;
 		for (i = 0; i < ITEM_COUNT; ++i)
-			if (i == ITEM_SCREW && storage_get_count(i) > 0)
+			if (i == ITEM_SCRAP && storage_get_count(i) > 0)
 				TCOD_console_print(NULL, 1, linenum++, "Screws: %d", storage_get_count(i));
 	} else if (state == MENU_SEARCH) {
 		TCOD_console_print(NULL, 1, linenum++, "Search Menu");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
-		TCOD_console_print(NULL, 1, linenum++, "s - screws");
+		TCOD_console_print(NULL, 1, linenum++, "s - scrap");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print(NULL, 1, linenum++, "esc - back");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);

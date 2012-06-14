@@ -4,11 +4,12 @@
 #include "point.h"
 #include "robot.h"
 
-#define ITEM_NONE 	0
-#define ITEM_BUCKET 	1
-#define ITEM_WELL	2
-#define ITEM_SCREW	3
-#define ITEM_COUNT	4
+#define ITEM_NONE		0
+#define ITEM_BUCKET		1
+#define ITEM_WELL		2
+#define ITEM_SCRAP		3
+#define ITEM_TREE		4
+#define ITEM_COUNT		5
 
 #define RESEARCH_ROBOT_GATHERER	0
 #define RESEARCH_COUNT		1
