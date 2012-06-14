@@ -8,19 +8,17 @@
 #include "building.h"
 
 robot* robots;
-robot genius;
 
 robot_model robot_models[] = {
-	{ ROBOT_GENIUS, "Genius", 12, 2, },
+	{ ROBOT_GENIUS, "Genius", 8, 2, },
 	{ ROBOT_GATHERER, "Gatherer", 6, 237, },
 };
 
 void robots_init()
 {
-	genius.model = robot_models[ROBOT_GENIUS];
-	genius.p.x = 40;
-	genius.p.y = 10;
-	robots = &genius;
+	robot_create(ROBOT_GENIUS, 40, 10);
+	robot_create(ROBOT_GENIUS, 44, 13);
+	robot_create(ROBOT_GENIUS, 46, 12);
 
 	robot_models[ROBOT_GATHERER].idle_task = task_search_create(ITEM_SCREW);
 }
@@ -38,9 +36,8 @@ void robot_create(int model, int x, int y)
 
 void robot_add(robot *d)
 {
-	// genius is first
-	if (robots->next == NULL) {
-		robots->next = d;
+	if (robots == NULL) {
+		robots = d;
 		d->next = NULL;
 		return;
 	}
