@@ -3,8 +3,8 @@ OS = $(shell uname -s | tr a-z A-Z)
 CFLAGS = -g -Wall
 LDFLAGS = -ltcod
 ifeq ($(OS),DARWIN)
-CFLAGS += -DMACOSX -gstabs
-LDFLAGS += -lpng -L/usr/X11/lib -framework OpenGL -lSDL -gstabs
+CFLAGS += -DMACOSX
+LDFLAGS += -lpng -L/usr/X11/lib -framework OpenGL -lSDL
 endif
 
 .PHONY: all clean
