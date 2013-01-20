@@ -9,8 +9,7 @@
 #define ITEM_WELL		2
 #define ITEM_SCRAP		3
 #define ITEM_TREE		4
-#define ITEM_SCREW		5
-#define ITEM_COUNT		6
+#define ITEM_COUNT		5
 
 #define RESEARCH_ROBOT_GATHERER	0
 #define RESEARCH_COUNT		1

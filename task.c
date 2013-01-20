@@ -105,8 +105,10 @@ int task_search_act(robot *d, float frameduration)
 task* task_search_create(int item)
 {
 	task *t = malloc(sizeof(task));
-	if (item == ITEM_SCREW)
-		t->desc = "Search for a screw";
+	if (item == ITEM_SCRAP)
+		t->desc = "Search for scrap";
+	else
+		t->desc = "Searching";
 	t->act = task_search_act;
 	t->stage = 0;
 	t->localdata = malloc(sizeof(task_search_data));
