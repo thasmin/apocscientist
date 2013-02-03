@@ -6,32 +6,34 @@
 #include "task.h"
 #include "map.h"
 #include "building.h"
+#include "job.h"
 
 robot* robots;
 
-robot_model robot_models[] = {
-	{ ROBOT_GENIUS, "Genius", 8, 2, },
-	{ ROBOT_GATHERER, "Gatherer", 6, 237, },
-};
-
 void robots_init()
 {
-	robot_create(ROBOT_GENIUS, 40, 10);
-	robot_create(ROBOT_GENIUS, 44, 13);
-	robot_create(ROBOT_GENIUS, 46, 12);
-
-	robot_models[ROBOT_GATHERER].idle_task = task_search_create(ITEM_SCRAP);
+	robot_create("robot 1", 40, 10);
+	robot_create("robot 2", 44, 13);
+	robot_create("robot 3", 46, 12);
 }
 
-void robot_create(int model, int x, int y)
+robot* robot_create(const char* name, int x, int y)
 {
 	robot *r = malloc(sizeof(robot));
-	r->model = robot_models[model];
+	r->name = name;
 	r->p.x = x;
 	r->p.y = y;
+	r->speed = 6;
 	r->carrying = ITEM_NONE;
 	r->curr_task = NULL;
+	r->job = job_get(JOB_NONE);
 	robot_add(r);
+	return r;
+}
+
+void robot_set_job(robot *robot, int job)
+{
+	robot->job = job_get(job);
 }
 
 void robot_add(robot *d)

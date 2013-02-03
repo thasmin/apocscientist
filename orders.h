@@ -2,6 +2,7 @@
 #define ORDERS_H
 
 #include "task.h"
+#include "robot.h"
 
 typedef struct _order {
 	task* task;

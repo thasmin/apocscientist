@@ -10,6 +10,7 @@
 #include <tcod/libtcod.h>
 
 #include "map.h"
+#include "robot.h"
 
 building* buildings;
 
@@ -127,3 +128,20 @@ int building_model_exists(int model)
 			return 1;
 	return 0;
 }
+
+building* building_get_next_of_model(int model, building *start)
+{
+	building *b = start == NULL ? buildings : start->next;
+	while (b != NULL) {
+		if (b->model->model == model)
+			return b;
+		b = b->next;
+	}
+	return NULL;
+}
+
+void building_set_worker(building *building, robot *worker)
+{
+	building->worker = worker;
+}
+

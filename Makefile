@@ -1,6 +1,6 @@
 CC = gcc -std=c99
 OS = $(shell uname -s | tr a-z A-Z)
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Werror
 LDFLAGS = -ltcod
 ifeq ($(OS),DARWIN)
 CFLAGS += -DMACOSX
@@ -11,7 +11,7 @@ endif
 
 all: squareciv
 
-squareciv: squareciv.c point.o robot.o task.o map.o menu.o building.o orders.o
+squareciv: squareciv.c point.o robot.o task.o map.o menu.o building.o orders.o job.o
 	$(CC) $(CFLAGS)      -o $@ $^ $(LDFLAGS)
 
 clean:

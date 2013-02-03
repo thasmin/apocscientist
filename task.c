@@ -1,6 +1,8 @@
 #include "task.h"
 #include "building.h"
 #include "map.h"
+#include "job.h"
+#include "robot.h"
 
 #include <string.h>
 
@@ -23,7 +25,7 @@ int research_is_completed(int research_id)
 	return research[research_id];
 }
 
-task* task_clone(task *t)
+task* task_clone(const task *t)
 {
 	if (t == NULL)
 		return NULL;
@@ -73,8 +75,7 @@ int task_search_act(robot *d, float frameduration)
 	}
 	switch (t->stage) {
 		case 1:
-			map_walk(data->path, &d->p, d->model.speed * frameduration);
-			//point_moveto(&d->p, &data->item_p, d->model.speed * frameduration);
+			map_walk(data->path, &d->p, d->speed * frameduration);
 			if (point_equals(&d->p, &data->item_p))
 				t->stage++;
 			return 1;
@@ -89,8 +90,7 @@ int task_search_act(robot *d, float frameduration)
 			t->stage++;
 			return 1;
 		case 3:
-			map_walk(data->path, &d->p, d->model.speed * frameduration);
-			//point_moveto(&d->p, &data->storage_p, d->model.speed * frameduration);
+			map_walk(data->path, &d->p, d->speed * frameduration);
 			if (point_equals(&d->p, &data->storage_p))
 				t->stage++;
 			return 1;
@@ -139,7 +139,7 @@ int task_construct_act(robot *d, float frameduration)
 	};
 	switch (t->stage) {
 		case 0:
-			point_moveto(&d->p, &center, d->model.speed * frameduration);
+			point_moveto(&d->p, &center, d->speed * frameduration);
 			if (point_equals(&d->p, &center))
 				t->stage++;
 			return 1;
@@ -196,7 +196,7 @@ int task_research_act(robot *d, float frameduration)
 	switch (t->stage)
 	{
 		case 1:
-			point_moveto(&d->p, &data->lab_p, d->model.speed * frameduration);
+			point_moveto(&d->p, &data->lab_p, d->speed * frameduration);
 			if (point_equals(&d->p, &data->lab_p))
 				t->stage++;
 			return 1;
@@ -269,7 +269,7 @@ int task_build_act(robot *d, float frameduration)
 		return 1;
 	}
 	if (t->stage == 2) {
-		point_moveto(&d->p, &data->ingredient_p, d->model.speed * frameduration);
+		point_moveto(&d->p, &data->ingredient_p, d->speed * frameduration);
 		if (point_equals(&d->p, &data->ingredient_p))
 			t->stage++;
 		return 1;
@@ -286,7 +286,7 @@ int task_build_act(robot *d, float frameduration)
 		return 1;
 	}
 	if (t->stage == 4) {
-		point_moveto(&d->p, &data->workshop_p, d->model.speed * frameduration);
+		point_moveto(&d->p, &data->workshop_p, d->speed * frameduration);
 		if (point_equals(&d->p, &data->workshop_p))
 			t->stage++;
 		return 1;
@@ -304,7 +304,8 @@ int task_build_act(robot *d, float frameduration)
 		return 1;
 	}
 	if (t->stage == 7) {
-		robot_create(ROBOT_GATHERER, data->workshop_p.x + 1, data->workshop_p.y + 1);
+		robot *gatherer = robot_create("gatherer", data->workshop_p.x + 1, data->workshop_p.y + 1);
+		robot_set_job(gatherer, JOB_GATHERER);
 		return 0;
 	}
 
@@ -313,6 +314,7 @@ int task_build_act(robot *d, float frameduration)
 
 task* task_build_create(int buildable)
 {
+
 	task *t = malloc(sizeof(task));
 	t->desc = "Build in the workshop";
 	t->act = task_build_act;

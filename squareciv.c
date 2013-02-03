@@ -17,11 +17,13 @@
 #include "menu.h"
 #include "building.h"
 #include "orders.h"
+#include "job.h"
 
 #define CHAR_BUCKET 	207
-#define CHAR_WELL 	9
-#define CHAR_GUY 	2
-#define CHAR_SCRAP 	21
+#define CHAR_WELL		9
+#define CHAR_GUY		2
+#define CHAR_SCRAP		21
+#define CHAR_ROCK		8
 #define CHAR_GATHERER	239
 
 int symbols[ITEM_COUNT];
@@ -32,6 +34,7 @@ void setup_map()
 	symbols[ITEM_BUCKET] = CHAR_BUCKET;
 	symbols[ITEM_WELL] = CHAR_WELL;
 	symbols[ITEM_SCRAP] = CHAR_SCRAP;
+	symbols[ITEM_ROCK] = CHAR_ROCK;
 
 	// house is 50,15 to 70,35
 	// make 5 screws outside house
@@ -61,7 +64,7 @@ int task_pour_bucket_act(robot *d, float frameduration)
 	// stage 3 is pour bucket
 	switch (t->stage) {
 		case 0:
-			point_moveto(&robot_genius()->p, &data->bucket, d->model.speed * frameduration);
+			point_moveto(&robot_genius()->p, &data->bucket, d->speed * frameduration);
 			if (point_equals(&robot_genius()->p, &data->bucket))
 				t->stage++;
 			return 1;
@@ -70,7 +73,7 @@ int task_pour_bucket_act(robot *d, float frameduration)
 			t->stage++;
 			return 1;
 		case 2:
-			point_moveto(&robot_genius()->p, &data->well, d->model.speed * frameduration);
+			point_moveto(&robot_genius()->p, &data->well, d->speed * frameduration);
 			if (point_equals(&robot_genius()->p, &data->well))
 				t->stage++;
 			return 1;
@@ -117,10 +120,15 @@ void setup_scenario_one()
 	building_add(BUILDING_WORKSHOP, &workshop);
 	point storage = { 50, 26 };
 	building_add(BUILDING_STORAGE, &storage);
+	point quarry = { 64, 30 };
+	building_add(BUILDING_QUARRY, &quarry);
 
 	robot_genius()->p.x = 46;
 	robot_genius()->p.y = 22;
-	robot_create(ROBOT_GATHERER, 47, 22);
+	robot *gatherer = robot_create("gatherer", 47, 22);
+	robot_set_job(gatherer, JOB_GATHERER);
+	robot *miner = robot_create("gatherer", 47, 32);
+	robot_set_job(miner, JOB_MINER);
 }
 
 int main(int argc, char* argv[])
@@ -131,6 +139,7 @@ int main(int argc, char* argv[])
 	robots_init();
 	buildings_init();
 	orders_init();
+	job_init();
 	temp_building = NULL;
 
 	// global options
@@ -169,20 +178,24 @@ int main(int argc, char* argv[])
 	TCOD_console_set_default_background(NULL, TCOD_black);
 	TCOD_console_set_default_foreground(NULL, TCOD_light_gray);
 
+	int game_paused = 0;
+	robot *chosen_robot = NULL;
+
 	do {
 		TCOD_console_clear(NULL);
 
-		// give orders to idle robots
-		robot *d;
-		robot_reset_idle();
-		for (d = robot_next_idle(); d != NULL; d = robot_next_idle()) {
-			d->curr_task = order_next(d);
-			if (d->curr_task == NULL) {
-				d->curr_task = task_clone(d->model.idle_task);
+		if (!game_paused) {
+			// give orders to idle robots
+			robot *d;
+			robot_reset_idle();
+			while ((d = robot_next_idle()) != NULL) {
+				d->curr_task = order_next(d);
+				if (d->curr_task == NULL && d->job->idle_task != NULL)
+					d->curr_task = d->job->idle_task(d);
 			}
-		}
 
-		robots_act(TCOD_sys_get_last_frame_length());
+			robots_act(TCOD_sys_get_last_frame_length());
+		}
 
 		// draw map
 		for (int i = 0; i < MAP_COLS; ++i)
@@ -191,8 +204,12 @@ int main(int argc, char* argv[])
 					TCOD_console_set_char(NULL, i, j, symbols[map_item_at(i, j)]);
 
 		// draw robots
-		for (d = robot_genius(); d != NULL; d = d->next)
-			TCOD_console_set_char(NULL, d->p.x, d->p.y, d->model.mapchar);
+		robot *d;
+		for (d = robot_genius(); d != NULL; d = d->next) {
+			if (menu_get_state() == MENU_CHOOSE_ROBOT && chosen_robot == d)
+				TCOD_console_print_frame(NULL, d->p.x - 1, d->p.y - 1, 3, 3, false, TCOD_BKGND_NONE, NULL);
+			TCOD_console_set_char(NULL, d->p.x, d->p.y, d->job->mapchar);
+		}
 
 		buildings_draw();
 		if (temp_building != NULL)
@@ -213,6 +230,11 @@ int main(int argc, char* argv[])
 					menu_set_state(MENU_BUILD);
 				else if (key.c == 'r' || key.c == 'R')
 					menu_set_state(MENU_RESEARCH);
+				else if (key.c == 'v' || key.c == 'V') {
+					menu_set_state(MENU_CHOOSE_ROBOT);
+					game_paused = 1;
+					chosen_robot = robot_genius();
+				}
 			} else if (menu_get_state() == MENU_SEARCH) {
 				if (key.vk == TCODK_ESCAPE)
 					menu_set_state(MENU_NONE);
@@ -244,9 +266,9 @@ int main(int argc, char* argv[])
 					if (research_is_completed(RESEARCH_ROBOT_GATHERER) &&
 						building_model_exists(BUILDING_WORKSHOP) &&
 						storage_get_count(ITEM_SCRAP) >= 2) {
-						order_add(
-							task_build_create(BUILDABLE_ROBOT_GATHERER)
-						);
+						order_add(task_build_create(BUILDABLE_ROBOT_GATHERER));
+					} else {
+						menu_set_message("need research, workshop, 2 scrap");
 					}
 				}
 			} else if (menu_get_state() == MENU_MOVEBUILDING) {
@@ -277,7 +299,25 @@ int main(int argc, char* argv[])
 					order_add(task_research_create(RESEARCH_ROBOT_GATHERER));
 					menu_set_state(MENU_NONE);
 				}
+			} else if (menu_get_state() == MENU_CHOOSE_ROBOT) {
+				if (key.vk == 'j' || key.vk == 'J')
+					menu_set_state(MENU_ASSIGN_JOB);
+				else if (key.vk == TCODK_ESCAPE) {
+					game_paused = 0;
+					chosen_robot = NULL;
+					menu_set_state(MENU_NONE);
+				}
+			} else if (menu_get_state() == MENU_ASSIGN_JOB) {
+				if (key.vk == 'm' || key.vk == 'm') {
+					robot_set_job(chosen_robot, JOB_MINER);
+					game_paused = 0;
+					chosen_robot = NULL;
+					menu_set_state(MENU_ASSIGN_JOB);
+				} else if (key.vk == TCODK_ESCAPE) {
+					menu_set_state(MENU_CHOOSE_ROBOT);
+				}
 			}
+
 		}
 	} while (!TCOD_console_is_window_closed());
 

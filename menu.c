@@ -10,6 +10,7 @@
 #include "building.h"
 
 menu_state state;
+const char *message = NULL;
 
 void menu_init()
 {
@@ -26,6 +27,11 @@ void menu_set_state(menu_state new_state)
 	state = new_state;
 }
 
+void menu_set_message(const char* m)
+{
+	message = m;
+}
+
 void menu_draw()
 {
 	// draw menu
@@ -40,6 +46,7 @@ void menu_draw()
 		TCOD_console_print(NULL, 1, linenum++, "s - search");
 		if (building_model_exists(BUILDING_LABORATORY))
 			TCOD_console_print(NULL, 1, linenum++, "r - research");
+		TCOD_console_print(NULL, 1, linenum++, "v - choose a robot");
 		TCOD_console_print(NULL, 1, linenum++, "q - quit");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print(NULL, 1, linenum++, "The genius is...");
@@ -61,9 +68,12 @@ void menu_draw()
 		TCOD_console_print(NULL, 1, linenum++, "Storage");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		int i;
-		for (i = 0; i < ITEM_COUNT; ++i)
+		for (i = 0; i < ITEM_COUNT; ++i) {
 			if (i == ITEM_SCRAP && storage_get_count(i) > 0)
 				TCOD_console_print(NULL, 1, linenum++, "Screws: %d", storage_get_count(i));
+			if (i == ITEM_ROCK && storage_get_count(i) > 0)
+				TCOD_console_print(NULL, 1, linenum++, "Rocks: %d", storage_get_count(i));
+		}
 	} else if (state == MENU_SEARCH) {
 		TCOD_console_print(NULL, 1, linenum++, "Search Menu");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
@@ -102,5 +112,24 @@ void menu_draw()
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
 		TCOD_console_print(NULL, 1, linenum++, "esc - back");
 		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+	} else if (state == MENU_CHOOSE_ROBOT) {
+		TCOD_console_print(NULL, 1, linenum++, "Robot Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print(NULL, 1, linenum++, "j - assign a job");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print(NULL, 1, linenum++, "esc - back");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+	} else if (state == MENU_ASSIGN_JOB) {
+		TCOD_console_print(NULL, 1, linenum++, "Assign Job Menu");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print(NULL, 1, linenum++, "m - miner");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+		TCOD_console_print(NULL, 1, linenum++, "esc - back");
+		TCOD_console_hline(NULL, 1, linenum++, 28, TCOD_BKGND_NONE);
+	}
+
+	if (message != NULL) {
+		linenum++;
+		TCOD_console_print(NULL, 1, linenum++, message);
 	}
 }

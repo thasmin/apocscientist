@@ -3,21 +3,14 @@
 
 #include "point.h"
 
-struct _task;
-
-#define ROBOT_GENIUS	0
-#define ROBOT_GATHERER	1
-
-typedef struct _robot_model {
-	int robot_id;
-	char* name;
-	int speed;
-	int mapchar;
-	struct _task *idle_task;
-} robot_model;
+struct _job;
 
 typedef struct _robot {
-	robot_model model;
+	int robot_id;
+	const char* name;
+	int speed;
+	int mapchar;
+	const struct _job *job;
 	point p;
 	int carrying;
 	struct _task *curr_task;
@@ -26,7 +19,8 @@ typedef struct _robot {
 
 void robots_init();
 void robot_add(robot *d);
-void robot_create(int model, int x, int y);
+robot* robot_create(const char* name, int x, int y);
+void robot_set_job(robot *robot, int job);
 void robot_reset_idle();
 robot* robot_next_idle();
 robot* robot_genius();
@@ -39,7 +33,5 @@ int robot_consume(robot *d);
 void robot_act(robot *d, float frameduration);
 
 int robot_search(robot *d, int item);
-
-int robot_gatherer_idle(robot *d);
 
 #endif
