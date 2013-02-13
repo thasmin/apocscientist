@@ -114,7 +114,6 @@ building* building_find_closest(point *p, int model)
 	return closest;
 }
 
-// warning: returning a struct by value
 void building_adjust_to_center(building *b, point *p)
 {
 	p->x += b->model->width / 2;

@@ -1,7 +1,7 @@
 CC = gcc -std=c99
 OS = $(shell uname -s | tr a-z A-Z)
 CFLAGS = -g -Wall -Werror
-LDFLAGS = -ltcod
+LDFLAGS = -ltcod -llua
 ifeq ($(OS),DARWIN)
 CFLAGS += -DMACOSX
 LDFLAGS += -lpng -L/usr/X11/lib -framework OpenGL -lSDL
