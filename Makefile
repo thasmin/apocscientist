@@ -11,7 +11,7 @@ endif
 
 all: squareciv
 
-squareciv: squareciv.c point.o robot.o task.o map.o menu.o building.o orders.o job.o
+squareciv: squareciv.c point.o robot.o task.o map.o menu.o building.o orders.o job.o lualib.o
 	$(CC) $(CFLAGS)      -o $@ $^ $(LDFLAGS)
 
 clean:

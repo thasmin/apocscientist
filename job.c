@@ -2,6 +2,7 @@
 #include "robot.h"
 #include "map.h"
 #include "building.h"
+#include "lualib.h"
 
 job jobs[JOB_COUNT];
 
@@ -95,6 +96,25 @@ int task_mine_act(robot *d, float frameduration)
 
 task* task_mine_create(robot *r)
 {
+	// load tasks, get the item at index 0, then get the create method
+	lua_getglobal(L, "tasks");
+	lua_pushinteger(L, 1);
+	lua_gettable(L, -2);
+	lua_pushstring(L, "create");
+	lua_gettable(L, -2);
+
+	// push a robot onto the stack and call the function
+	lh_push_robot(L, robot_genius());
+	int err = lua_pcall(L, 1, 1, 0);
+	if (err != 0)
+		printf("error: %s\n", lua_tostring(L, -1));
+	lua_pushstring(L, "act");
+	lua_gettable(L, -2);
+	printf("top of lua stack is a %s\n", luaL_typename(L, -1));
+
+	//return;
+	lua_pop(L, 3);
+
 	task *t = malloc(sizeof(task));
 	t->desc = "Mine the quarry";
 	t->act = task_mine_act;
