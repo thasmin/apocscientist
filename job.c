@@ -63,69 +63,33 @@ typedef struct {
 	float delay;
 } task_mine_data;
 
-int task_mine_act(robot *d, float frameduration)
-{
-	task *t = d->curr_task;
-	task_mine_data* data = (task_mine_data*)t->localdata;
-
-	// stage 0 is move
-	// stage 1 is delay
-	// stage 2 is build
-	building *building = data->building;
-	point center = {
-		data->building->p.x + building->model->width / 2,
-		data->building->p.y + building->model->height / 2
-	};
-	switch (t->stage) {
-		case 0:
-			point_moveto(&d->p, &center, d->speed * frameduration);
-			if (point_equals(&d->p, &center))
-				t->stage++;
-			return 1;
-		case 1:
-			data->delay -= frameduration;
-			if (data->delay <= 0)
-				t->stage++;
-			return 1;
-		case 2:
-			map_create_item(center.x, center.y + 3, ITEM_ROCK);
-			return 0;
-	}
-	return 0;
-}
-
 task* task_mine_create(robot *r)
 {
-	// load tasks, get the item at index 0, then get the create method
+	// load tasks, get the item at index 0
 	lua_getglobal(L, "tasks");
 	lua_pushinteger(L, 1);
 	lua_gettable(L, -2);
+
+	// call the create method with a robot on the stack
 	lua_pushstring(L, "create");
 	lua_gettable(L, -2);
-
-	// push a robot onto the stack and call the function
 	lh_push_robot(L, robot_genius());
 	int err = lua_pcall(L, 1, 1, 0);
 	if (err != 0)
 		printf("error: %s\n", lua_tostring(L, -1));
-	lua_pushstring(L, "act");
-	lua_gettable(L, -2);
-	printf("top of lua stack is a %s\n", luaL_typename(L, -1));
 
-	//return;
-	lua_pop(L, 3);
-
+	// get the description
 	task *t = malloc(sizeof(task));
-	t->desc = "Mine the quarry";
-	t->act = task_mine_act;
-	t->stage = 0;
+	lua_pushstring(L, "desc");
+	lua_gettable(L, -2);
+	t->desc = luaL_checkstring(L, -1);
+	lua_pop(L, 1);
 
-	t->localdata = malloc(sizeof(task_mine_data));
-	t->localdata_size = sizeof(task_mine_data);
-	task_mine_data *data = (task_mine_data*) t->localdata;
-	// TODO: find a quarry without a worker
-	data->building = building_find_closest(&r->p, BUILDING_QUARRY);
-	data->delay = 2;
+	// store the lua table so we can call act later
+	t->lua_table = luaL_ref(L, LUA_REGISTRYINDEX);
+	t->act = NULL;
+
+	lua_pop(L, 1);
 	return t;
 }
 

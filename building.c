@@ -50,6 +50,7 @@ building* building_create(int model, point *p)
 	building *b = malloc(sizeof(building));
 	b->model = &building_models[model];
 	memcpy(&b->p, p, sizeof(point));
+	b->worker = NULL;
 	b->next = buildings;
 	return b;
 }

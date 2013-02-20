@@ -14,6 +14,7 @@ typedef struct _robot {
 	point p;
 	int carrying;
 	struct _task *curr_task;
+	int lua_ref;
 	struct _robot *next;
 } robot;
 

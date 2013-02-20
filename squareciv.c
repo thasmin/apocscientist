@@ -133,37 +133,13 @@ void setup_scenario_one()
 	robot_set_job(miner, JOB_MINER);
 }
 
-const struct luaL_reg point_lib[] = {
-	{"new", l_point_new},
-	{NULL, NULL},
-};
-const struct luaL_reg buildings_lib[] = {
-	{"find_closest", l_buildings_find_closest},
-	{NULL, NULL},
-};
-const struct luaL_Reg l_building_model_reg[] = {
-	{ "__index", l_building_model__index } ,
-	{ NULL, NULL }
-};
-const struct luaL_Reg l_building_reg[] = {
-	{ "__index", l_building__index } ,
-	{ "__tostring", l_building__tostring } ,
-	{ NULL, NULL }
-};
-const struct luaL_Reg l_robot_reg[] = {
-	{ "moveto", l_robot_moveto } ,
-	{ "__index", l_robot__index } ,
-	{ "__tostring", l_robot__tostring } ,
-	{ NULL, NULL }
-};
-const struct luaL_Reg l_point_reg[] = {
-	{ "__index", l_point__index },
-	{ "__tostring", l_point__tostring },
-	{ NULL, NULL },
-};
-
 int main(int argc, char* argv[])
 {
+	// initialize lua first so it's available to other inits
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	lualib_init(L);
+
 	// initialize data structures
 	research_init();
 	map_init();
@@ -204,8 +180,6 @@ int main(int argc, char* argv[])
 
 	/*******************************/
 	// load lua scripts
-	L = luaL_newstate();
-	luaL_openlibs(L);
 	int err = luaL_loadfile(L, "tasks/mine.lua");
 	if (err != 0) {
 		printf("loadfile error: %d\n", err);
@@ -222,22 +196,6 @@ int main(int argc, char* argv[])
 		printf("LUA_ERRERR: %d\n", LUA_ERRERR);
 		exit(1);
 	}
-
-	// create robot object functions
-	luaL_newmetatable(L, LUA_MT_BUILDING);
-	luaL_register(L, NULL, l_building_reg);
-	luaL_newmetatable(L, LUA_MT_BUILDING_MODEL);
-	luaL_register(L, NULL, l_building_model_reg);
-	luaL_newmetatable(L, LUA_MT_ROBOT);
-	luaL_register(L, NULL, l_robot_reg);
-	luaL_newmetatable(L, LUA_MT_POINT);
-	luaL_register(L, NULL, l_point_reg);
-	lua_pop(L, 4);
-
-	// create global functions
-	luaL_openlib(L, "buildings", buildings_lib, 0);
-	luaL_openlib(L, "point", point_lib, 0);
-	lua_pop(L, 2);
 
 	// load tasks, get the item at index 0, then get the create method
 	lua_getglobal(L, "tasks");

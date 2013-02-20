@@ -1,3 +1,10 @@
+ITEM_NONE		= 0
+ITEM_BUCKET		= 1
+ITEM_WELL		= 2
+ITEM_SCRAP		= 3
+ITEM_TREE		= 4
+ITEM_ROCK		= 5
+
 mine = {
 	desc = "Mine the quarry",
 	stage = 0,
@@ -19,10 +26,10 @@ function mine.create(robot)
 
 	return {
 		desc = "Mine the quarry",
-		act = function (robot, frameduration)
+		act = function (frameduration)
 			if stage == 0 then
 				robot:moveto(building_center, frameduration)
-				if point_equals(robot.p, building_center) then
+				if robot.p == building_center then
 					stage = stage + 1
 				end
 				return 1
@@ -33,19 +40,15 @@ function mine.create(robot)
 				end
 				return 1
 			elseif stage == 2 then
-				map:create_item(center.x, center.y + 3, ITEM_ROCK)
+				item_loc = point.new(building_center.x, building.p.y + building.model.height)
+				map.create_item(item_loc, ITEM_ROCK)
 				return 0
 			end
 		end
 	}
 end
 
-function tmp(i)
-	return i * 10
-end
-
 mine_task = {
-	--create = tmp, --mine.create,
 	create = mine.create,
 	act = mine.act
 }

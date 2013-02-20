@@ -25,6 +25,7 @@ typedef struct _task {
 	int stage;
 	void* localdata;
 	int localdata_size;
+	int lua_table;
 } task;
 
 task* task_clone(const task *t);

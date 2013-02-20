@@ -7,6 +7,7 @@
 #include "map.h"
 #include "building.h"
 #include "job.h"
+#include "lualib.h"
 
 robot* robots;
 
@@ -19,7 +20,11 @@ void robots_init()
 
 robot* robot_create(const char* name, int x, int y)
 {
-	robot *r = malloc(sizeof(robot));
+	robot *r = (robot *)lua_newuserdata(L, sizeof(robot));
+	luaL_getmetatable(L, LUA_MT_ROBOT);
+	lua_setmetatable(L, -2);
+	r->lua_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
 	r->name = name;
 	r->p.x = x;
 	r->p.y = y;
@@ -82,8 +87,23 @@ void robot_act(robot *d, float frameduration)
 	// make sure robot has a task
 	if (d->curr_task == NULL)
 		return;
-	if (d->curr_task->act(d, frameduration) == 0)
-		d->curr_task = NULL;
+	// see if we should be calling C or lua
+	if (d->curr_task->act != NULL) {
+		if (d->curr_task->act(d, frameduration) == 0)
+			d->curr_task = NULL;
+	} else {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, d->curr_task->lua_table);
+		lua_pushstring(L, "act");
+		lua_gettable(L, -2);
+		lua_pushnumber(L, frameduration);
+		int err = lua_pcall(L, 1, 1, 0);
+		if (err != 0)
+			printf("err: %s\n", lua_tostring(L, -1));
+		int moretask = lua_tointeger(L, -1);
+		lua_pop(L, 2);
+		if (moretask == 0)
+			d->curr_task = NULL;
+	}
 }
 
 int robot_pickup(robot *d)
