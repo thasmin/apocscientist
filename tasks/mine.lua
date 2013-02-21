@@ -50,9 +50,10 @@ end
 
 mine_task = {
 	create = mine.create,
-	act = mine.act
 }
 
-tasks = { mine_task }
+tasks = {
+	mine = mine_task
+}
 
 

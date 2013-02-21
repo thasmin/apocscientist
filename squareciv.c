@@ -196,25 +196,6 @@ int main(int argc, char* argv[])
 		printf("LUA_ERRERR: %d\n", LUA_ERRERR);
 		exit(1);
 	}
-
-	// load tasks, get the item at index 0, then get the create method
-	lua_getglobal(L, "tasks");
-	lua_pushinteger(L, 1);
-	lua_gettable(L, -2);
-	lua_pushstring(L, "create");
-	lua_gettable(L, -2);
-
-	// push a robot onto the stack and call the function
-	lh_push_robot(L, robot_genius());
-	err = lua_pcall(L, 1, 1, 0);
-	if (err != 0)
-		printf("error: %s\n", lua_tostring(L, -1));
-	else
-		printf("result: %g\n", lua_tonumber(L, -1));
-
-	// clear lua stack of the return value of the create method, the item at index 0, and the tasks list
-	lua_pop(L, 3);
-
 	/*******************************/
 
 	TCOD_key_t key = {TCODK_NONE,0};

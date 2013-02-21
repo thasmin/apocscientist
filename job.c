@@ -67,7 +67,7 @@ task* task_mine_create(robot *r)
 {
 	// load tasks, get the item at index 0
 	lua_getglobal(L, "tasks");
-	lua_pushinteger(L, 1);
+	lua_pushstring(L, "mine");
 	lua_gettable(L, -2);
 
 	// call the create method with a robot on the stack
