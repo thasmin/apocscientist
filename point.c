@@ -33,7 +33,7 @@ int point_equals(point *p1, point *p2)
 		return 1;
 	if (p1 == NULL || p2 == NULL)
 		return 0;
-	return (int)p1->x == (int)p2->x && (int)p1->y == (int)p2->y;
+	return p1->x == p2->x && p1->y == p2->y;
 }
 
 void point_moveto(point *mover, point *target, float dist)

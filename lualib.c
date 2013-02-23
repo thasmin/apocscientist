@@ -14,13 +14,14 @@ int l_point_new(lua_State *L);
 int l_buildings_find_closest(lua_State *L);
 
 int l_map_create_item(lua_State *L);
+int l_map_compute_path(lua_State *L);
 
 int l_building_model__index(lua_State *L);
 
 int l_building__index(lua_State *L);
 int l_building__tostring(lua_State *L);
 
-int l_robot_moveto(lua_State *L);
+int l_robot_walk_along(lua_State *L);
 int l_robot__index(lua_State *L);
 int l_robot__tostring(lua_State *L);
 
@@ -37,6 +38,7 @@ const struct luaL_reg buildings_lib[] = {
 	{NULL, NULL},
 };
 const struct luaL_reg map_lib[] = {
+	{"compute_path", l_map_compute_path},
 	{"create_item", l_map_create_item},
 	{NULL, NULL},
 };
@@ -51,7 +53,6 @@ const struct luaL_Reg l_building_reg[] = {
 	{ NULL, NULL }
 };
 const struct luaL_Reg l_robot_reg[] = {
-	{ "moveto", l_robot_moveto } ,
 	{ "__index", l_robot__index } ,
 	{ "__tostring", l_robot__tostring } ,
 	{ NULL, NULL }
@@ -132,6 +133,15 @@ int l_buildings_find_closest(lua_State *L)
 	return 1;
 }
 
+int l_map_compute_path(lua_State *L)
+{
+	point *start = (point*) luaL_checkudata(L, 1, LUA_MT_POINT);
+	point *dest = (point*) luaL_checkudata(L, 2, LUA_MT_POINT);
+	TCOD_path_t *path = map_computepath(start, dest);
+	lua_pushlightuserdata(L, path);
+	return 1;
+}
+
 int l_map_create_item(lua_State *L)
 {
 	point *p = (point*) luaL_checkudata(L, 1, LUA_MT_POINT);
@@ -177,12 +187,14 @@ int l_building__tostring(lua_State *L)
 	return 1;
 }
 
-int l_robot_moveto(lua_State *L)
+int l_robot_walk_along(lua_State *L)
 {
+	if (!lua_islightuserdata(L, 2))
+		return 0;
 	robot *r = (robot*) luaL_checkudata(L, 1, LUA_MT_ROBOT);
-	point *dest = (point*) luaL_checkudata(L, 2, LUA_MT_POINT);
+	TCOD_path_t *path = (TCOD_path_t*) lua_topointer(L, 2);
 	float frameduration = luaL_checknumber(L, 3);
-	point_moveto(&r->p, dest, r->speed * frameduration);
+	map_walk(path, &r->p, r->speed * frameduration);
 	return 0;
 }
 
@@ -193,8 +205,8 @@ int l_robot__index(lua_State *L)
 	if (strcmp(prop, "p") == 0) {
 		lh_push_point(L, &r->p);
 		return 1;
-	} else if (strcmp(prop, "moveto") == 0) {
-		lua_pushcfunction(L, l_robot_moveto);
+	} else if (strcmp(prop, "walk_along") == 0) {
+		lua_pushcfunction(L, l_robot_walk_along);
 		return 1;
 	}
 	return 0;

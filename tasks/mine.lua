@@ -17,20 +17,22 @@ end
 
 function mine.create(robot)
 	local delay = 2
-	local stage = 0
 	local building = buildings.find_closest(robot.p)
 	local building_center = point.new(
-		building.p.x + building.model.width / 2,
-		building.p.y + building.model.height / 2
+		math.floor(building.p.x + building.model.width / 2),
+		math.floor(building.p.y + building.model.height / 2)
 	)
+	local stage = 0
+	local path = map.compute_path(robot.p, building_center)
 
 	return {
 		desc = "Mine the quarry",
 		act = function (frameduration)
 			if stage == 0 then
-				robot:moveto(building_center, frameduration)
 				if robot.p == building_center then
 					stage = stage + 1
+				else
+					robot:walk_along(path, frameduration)
 				end
 				return 1
 			elseif stage == 1 then
