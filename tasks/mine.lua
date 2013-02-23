@@ -5,17 +5,7 @@ ITEM_SCRAP		= 3
 ITEM_TREE		= 4
 ITEM_ROCK		= 5
 
-mine = {
-	desc = "Mine the quarry",
-	stage = 0,
-	building = nil,
-	delay = 2,
-}
-
-function mine_act(self, robot, frameduration)
-end
-
-function mine.create(robot)
+function task_mine(robot)
 	local delay = 2
 	local building = buildings.find_closest(robot.p)
 	local building_center = point.new(
@@ -50,12 +40,8 @@ function mine.create(robot)
 	}
 end
 
-mine_task = {
-	create = mine.create,
-}
-
 tasks = {
-	mine = mine_task
+	mine = task_mine
 }
 
 

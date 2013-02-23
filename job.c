@@ -65,13 +65,9 @@ typedef struct {
 
 task* task_mine_create(robot *r)
 {
-	// load tasks, get the item at index 0
+	// load tasks, get the mine task and call it with a robot on the stack
 	lua_getglobal(L, "tasks");
 	lua_pushstring(L, "mine");
-	lua_gettable(L, -2);
-
-	// call the create method with a robot on the stack
-	lua_pushstring(L, "create");
 	lua_gettable(L, -2);
 	lh_push_robot(L, robot_genius());
 	int err = lua_pcall(L, 1, 1, 0);
